@@ -11,6 +11,7 @@ Repository-local planning and execution artifacts.
 <!-- spec-items:active:start -->
 | Item | Kind | Status | Updated |
 | --- | --- | --- | --- |
+| [Fun Sticky Note Rooms](./active/260924-1909-fun-sticky-note-rooms/plan.md) | work-item | planned | 2026-09-24 |
 <!-- spec-items:active:end -->
 
 ## Archive

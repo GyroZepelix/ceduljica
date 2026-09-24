@@ -1,0 +1,13 @@
+schema_version: 2
+id: 260924-1909-fun-sticky-note-rooms
+title: Fun Sticky Note Rooms
+kind: work-item
+work_type: other
+parent: null
+route: grill-to-spec
+status: planned
+superseded_by: null
+created_at: '2026-09-24T19:09:41+02:00'
+updated_at: '2026-09-24T19:34:45+02:00'
+external_refs: []
+wiki_refs: []

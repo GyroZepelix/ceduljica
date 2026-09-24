@@ -21,6 +21,12 @@ TBD after initial codebase ingest.
 
 TBD after initial codebase ingest.
 
+## Dream history
+
+- [Episode catalog](./dreams/episodes.jsonl): Metadata-only routing to immutable Dream logs.
+- [Per-spec checkpoint ledgers](./dreams/by-spec/): Append-only historical projections at `dreams/by-spec/<item-id>.md`.
+- Workflow retrospectives use the stable route `dreams/retrospectives/<item-id>.md` when a retrospective exists.
+
 ## Stale or needs review
 
 None recorded.
