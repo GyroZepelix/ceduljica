@@ -4,7 +4,7 @@ Plan: `../plan.md`
 Mode: sliced
 Assurance: medium - synchronized multi-client state, pre-reveal note privacy, disconnect recovery, and persistent lifecycle have meaningful regression cost within a recoverable single-instance deployment.
 Review tier: scoped checks per slice, focused review at each segment boundary, and one final contract-quality review over the complete implementation.
-Current: `02.01`
+Current: `02.02`
 Expected implementation sessions: 4
 Implementation starting checkpoint: `1cec850d5876cdcb4f3cfc7b8678c8c36673533e`
 
@@ -60,11 +60,11 @@ Boundary 01.01 -> 02.01: application coding before mockup approval would violate
 ### T02: Implement the authoritative room service and approved client experience
 
 Depends on: T01 approved
-Segment starting checkpoint: unrecorded
+Segment starting checkpoint: `fddc3c7e70b186e81e736302f9796cda3bb40c73`
 Segment acceptance: the tested server-owned lifecycle, SQLite persistence, participant-specific real-time protocol, and approved responsive client work together in development without disclosing another participant's note before reveal.
 Segment gate: all T02 checks pass and one focused implementation review covers state authority, privacy, recovery, and the approved interface.
 
-- [ ] 02.01: Build the authoritative room core and persistence (packet: `./02-01-authoritative-room-core.md`)
+- [x] 02.01: Build the authoritative room core and persistence (packet: `./02-01-authoritative-room-core.md`)
 
 Boundary 02.01 -> 02.02: the client must consume a verified server-owned protocol that withholds other note bodies before reveal; combining both obscures whether privacy or synchronization failures originate in transitions or presentation.
 

@@ -58,7 +58,19 @@ These paths are navigation hints. Inspect other source or tests only when this s
 
 ## Attempt log
 
-No attempts recorded.
+### Attempt 1 - completed
+
+- Starting boundary: clean `HEAD fddc3c7e70b186e81e736302f9796cda3bb40c73`; no unrelated staged, modified, or untracked paths were present.
+- Approval: the parent explicitly approved the exact runtime and development dependency versions plus the transactional, idempotent schema-v1 bootstrap before installation or schema execution. No additional package, table, service, or migration was introduced.
+- Delivered paths: `package.json`, `package-lock.json`, TypeScript/ESLint configuration, `.gitignore`, `src/domain/`, `src/db/`, `src/server/`, `src/shared/`, `src/index.ts`, `tests/domain/`, `tests/integration/`, and `tests/helpers.ts`.
+- Protocol: built-in Node HTTP handles health, room creation, join, and authenticated participant snapshots. `ws` accepts validated commands, emits acknowledgements or sanitized errors, and broadcasts a fresh participant-specific authoritative snapshot after state changes. Opaque room/session values are generated with cryptographic randomness in production; only SHA-256 session-token hashes are persisted.
+- State and privacy: one synchronous `RoomService` owns create, join, begin, draft, ready/edit, reveal, waiting/late join, disconnect/reconnect, removal, transfer, replay, deletion, and expiry. Pre-reveal projections contain only the requesting participant's draft; direct domain, HTTP endpoint, and multi-client WebSocket tests assert that another participant's distinctive body is absent.
+- Persistence and timing: schema v1 contains only `schema_version`, the serialized `rooms` aggregate with meaningful-activity/expiry columns, and hashed-token `sessions`; aggregate and session rewrites are one SQLite transaction. An injectable clock drives 60-second grace and 24-hour expiry. Restart recovery, cleanup, cascading deletion, rollback on a session constraint failure, coincident Ready/deadline orderings, owner removal, and no-duplicate reveal behavior are covered.
+- Checks: `npm ci` passed (141 packages, zero audit vulnerabilities); `npm run lint`, `npm run typecheck`, `npm run build`, and `git diff --check` passed; `npm test` passed 4 files and 20 tests; an explicit final-newline/trailing-whitespace scan passed for all 22 untracked text files; `uv run spec/scripts/manage-spec-item.py --root . validate --operational` passed with one active item and no warnings. `tsx --version` and a native in-memory `better-sqlite3` query passed after the clean install.
+- Review: none required for this ordinary non-final medium-assurance slice; the required focused implementation review remains at the T02 boundary after `02.02`. Review retries: zero.
+- Residual uncertainty: the final responsive client, browser rendering, client accessibility, sound/motion, Compose restart, and Docker-volume operation belong to later packets and were not implemented or claimed here. The approved single-process boundary is enforced architecturally but not a distributed coordination guarantee.
+- Progress: slice `02.01` is complete; T02 remains open; `Current` advanced exactly once to `02.02`.
+- Exact next action: begin a fresh Implement assignment for `02.02`; do not start `03.01` until the complete T02 checks and focused segment review pass.
 
 ## Completion and handoff
 

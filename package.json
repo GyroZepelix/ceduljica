@@ -1,0 +1,34 @@
+{
+  "name": "ceduljica",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Authoritative room service for Ceduljica",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server/main.ts",
+    "start": "node dist/server/main.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "better-sqlite3": "13.0.3",
+    "ws": "8.21.3",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/better-sqlite3": "9.6.0",
+    "@types/node": "26.6.2",
+    "@types/ws": "8.18.1",
+    "eslint": "10.11.0",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1",
+    "vitest": "5.0.1"
+  }
+}

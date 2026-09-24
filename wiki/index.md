@@ -11,7 +11,7 @@ Durable current-state codebase knowledge. Read this file first when answering co
 
 ## Architecture
 
-TBD after initial codebase ingest.
+- [Authoritative room core](./architecture/room-core.md): Server-owned lifecycle, participant-specific privacy projections, SQLite persistence, timing, and transport boundaries.
 
 ## Modules
 

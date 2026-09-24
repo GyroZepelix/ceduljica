@@ -1,2 +1,9 @@
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
+
+# Node and local runtime output
+node_modules/
+dist/
+coverage/
+data/
+.env

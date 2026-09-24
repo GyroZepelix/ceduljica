@@ -183,7 +183,7 @@ At the end of T01, T02, and T03, run the medium-assurance focused boundary revie
 
 - [x] Planning complete and confirmed.
 - [x] T01 visual contract approved and verified.
-- [ ] T02 application implementation not started.
+- [ ] T02 application implementation in progress: authoritative room core complete; responsive client pending.
 - [ ] T03 packaged-system verification not started.
 - [ ] Final verification not run.
 
