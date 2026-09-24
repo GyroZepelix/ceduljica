@@ -1,4 +1,6 @@
+import { readFile, stat } from 'node:fs/promises';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { extname, resolve, sep } from 'node:path';
 import type { Duplex } from 'node:stream';
 import { URL } from 'node:url';
 import { WebSocket, WebSocketServer, type RawData } from 'ws';
@@ -21,7 +23,13 @@ export class CeduljicaServer {
   private readonly webSockets = new WebSocketServer({ noServer: true, maxPayload: MAX_WS_PAYLOAD_BYTES });
   private timer: NodeJS.Timeout | null = null;
 
-  constructor(private readonly rooms: RoomService) {
+  private readonly staticRoot: string;
+
+  constructor(
+    private readonly rooms: RoomService,
+    options: { staticRoot?: string } = {},
+  ) {
+    this.staticRoot = resolve(options.staticRoot ?? 'dist/client');
     this.server = createServer((request, response) => {
       void this.handleHttp(request, response);
     });
@@ -96,10 +104,39 @@ export class CeduljicaServer {
         sendJson(response, 200, this.rooms.snapshot(bearerToken(request)));
         return;
       }
+      if (
+        (request.method === 'GET' || request.method === 'HEAD') &&
+        !url.pathname.startsWith('/api/') &&
+        (await this.serveClient(url.pathname, request.method === 'HEAD', response))
+      ) {
+        return;
+      }
       sendJson(response, 404, { error: { code: 'not_found', message: 'Route not found.' } });
     } catch (error) {
       sendError(response, error);
     }
+  }
+
+  private async serveClient(pathname: string, headOnly: boolean, response: ServerResponse): Promise<boolean> {
+    let requestedPath: string;
+    try {
+      requestedPath = decodeURIComponent(pathname);
+    } catch {
+      return false;
+    }
+    const relative = requestedPath === '/' ? 'index.html' : requestedPath.replace(/^\/+/, '');
+    const candidate = resolve(this.staticRoot, relative);
+    const withinRoot = candidate === this.staticRoot || candidate.startsWith(`${this.staticRoot}${sep}`);
+    const assetPath = withinRoot && (await isFile(candidate)) ? candidate : resolve(this.staticRoot, 'index.html');
+    if (!(await isFile(assetPath))) return false;
+    const body = await readFile(assetPath);
+    response.writeHead(200, {
+      'content-type': contentType(assetPath),
+      'content-length': body.byteLength,
+      'cache-control': assetPath.endsWith('index.html') ? 'no-store' : 'public, max-age=31536000, immutable',
+    });
+    response.end(headOnly ? undefined : body);
+    return true;
   }
 
   private handleUpgrade(request: IncomingMessage, socket: Duplex, head: Buffer): void {
@@ -276,6 +313,31 @@ function bearerToken(request: IncomingMessage): string {
     throw new RoomError('session_not_found', 'Session not found.');
   }
   return authorization.slice('Bearer '.length);
+}
+
+async function isFile(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function contentType(path: string): string {
+  switch (extname(path)) {
+    case '.css':
+      return 'text/css; charset=utf-8';
+    case '.js':
+      return 'text/javascript; charset=utf-8';
+    case '.svg':
+      return 'image/svg+xml';
+    case '.png':
+      return 'image/png';
+    case '.ico':
+      return 'image/x-icon';
+    default:
+      return 'text/html; charset=utf-8';
+  }
 }
 
 function sendJson(response: ServerResponse, status: number, body: unknown): void {

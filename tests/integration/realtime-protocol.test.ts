@@ -58,6 +58,7 @@ class ProtocolClient {
 
 let server: CeduljicaServer | undefined;
 let store: SqliteRoomStore | undefined;
+let fakeClock: FakeClock | undefined;
 let baseUrl = '';
 const clients: ProtocolClient[] = [];
 
@@ -71,7 +72,8 @@ afterEach(async () => {
 
 async function setup(): Promise<RoomService> {
   store = new SqliteRoomStore(':memory:');
-  const service = new RoomService(store, new FakeClock(), new DeterministicIdentities());
+  fakeClock = new FakeClock();
+  const service = new RoomService(store, fakeClock, new DeterministicIdentities());
   server = new CeduljicaServer(service);
   const port = await server.listen(0);
   baseUrl = `http://127.0.0.1:${String(port)}`;
@@ -173,6 +175,111 @@ describe('real-time participant-specific protocol', () => {
     const reveal = await guestClient.waitFor(snapshotWithPhase('reveal'));
     expect(JSON.stringify(reveal)).toContain('transport-owner-secret');
     expect(JSON.stringify(reveal)).toContain('transport-guest-secret');
+  });
+
+  it('drives the complete owner, waiting, replay, transfer, removal, and deletion flow', async () => {
+    await setup();
+    const owner = await post('/api/rooms', { nickname: 'Owner' });
+    const guest = await post(`/api/rooms/${owner.credentials.roomCode}/join`, { nickname: 'Guest' });
+    const ownerClient = await connect(owner.credentials.sessionToken);
+    const guestClient = await connect(guest.credentials.sessionToken);
+
+    ownerClient.send({ id: 'begin-full', type: 'begin' });
+    await ownerClient.waitFor(isAck('begin-full'));
+    const firstWriting = await guestClient.waitFor(snapshotWithPhase('writing'));
+
+    const late = await post(`/api/rooms/${owner.credentials.roomCode}/join`, { nickname: 'Late' });
+    let lateClient = await connect(late.credentials.sessionToken);
+    const lateWaiting = await lateClient.waitFor((message) => {
+      const room = record(record(message)?.room);
+      return record(message)?.type === 'snapshot' && record(room?.self)?.roundRole === 'waiting';
+    });
+    expect(record(record(lateWaiting)?.room)?.phase).toBe('writing');
+
+    guestClient.send({ id: 'guest-first-draft', type: 'save_draft', body: 'first version' });
+    await guestClient.waitFor(isAck('guest-first-draft'));
+    guestClient.send({ id: 'guest-first-ready', type: 'ready' });
+    await guestClient.waitFor(isAck('guest-first-ready'));
+    guestClient.send({ id: 'guest-edit', type: 'edit' });
+    await guestClient.waitFor(isAck('guest-edit'));
+    guestClient.send({ id: 'guest-final-draft', type: 'save_draft', body: 'guest final' });
+    await guestClient.waitFor(isAck('guest-final-draft'));
+    guestClient.send({ id: 'guest-final-ready', type: 'ready' });
+    await guestClient.waitFor(isAck('guest-final-ready'));
+
+    await lateClient.close();
+    clients.splice(clients.indexOf(lateClient), 1);
+    lateClient = await connect(late.credentials.sessionToken);
+    const restoredWaiting = await lateClient.waitFor((message) => {
+      const room = record(record(message)?.room);
+      return record(message)?.type === 'snapshot' && record(room?.self)?.roundRole === 'waiting';
+    });
+    expect(record(record(restoredWaiting)?.room)?.phase).toBe('writing');
+
+    ownerClient.send({ id: 'owner-draft-full', type: 'save_draft', body: 'owner final' });
+    await ownerClient.waitFor(isAck('owner-draft-full'));
+    ownerClient.send({ id: 'owner-ready-full', type: 'ready' });
+    await ownerClient.waitFor(isAck('owner-ready-full'));
+    const reveal = await lateClient.waitFor(snapshotWithPhase('reveal'));
+    const revealVersion = roomVersion(reveal);
+    expect(JSON.stringify(reveal)).toContain('owner final');
+    expect(JSON.stringify(reveal)).toContain('guest final');
+
+    ownerClient.send({ id: 'replay-full', type: 'replay' });
+    await ownerClient.waitFor(isAck('replay-full'));
+    const replayWriting = await guestClient.waitFor(
+      (message) => snapshotWithPhase('writing')(message) && roomVersion(message) > revealVersion,
+    );
+    const replayVersion = roomVersion(replayWriting);
+    const replayRoom = record(record(replayWriting)?.room);
+    expect((replayRoom?.participants as unknown[] | undefined)?.length).toBe(3);
+
+    await ownerClient.close();
+    clients.splice(clients.indexOf(ownerClient), 1);
+    const ownerDisconnected = await guestClient.waitFor((message) => {
+      const room = record(record(message)?.room);
+      const participants = room?.participants as Array<Record<string, unknown>> | undefined;
+      return roomVersion(message) > replayVersion && participants?.some((person) => person.id === owner.credentials.participantId && person.connected === false) === true;
+    });
+    const disconnectVersion = roomVersion(ownerDisconnected);
+    fakeClock?.advance(60_000);
+    server?.runMaintenance();
+    const transferred = await guestClient.waitFor((message) => {
+      const room = record(record(message)?.room);
+      const self = record(room?.self);
+      return roomVersion(message) > disconnectVersion && self?.isOwner === true;
+    });
+    expect(record(record(transferred)?.room)?.phase).toBe('writing');
+
+    const formerOwner = await connect(owner.credentials.sessionToken);
+    const formerSnapshot = await formerOwner.waitFor((message) => {
+      const room = record(record(message)?.room);
+      const self = record(room?.self);
+      return record(message)?.type === 'snapshot' && self?.isOwner === false && self?.roundRole === 'waiting';
+    });
+    expect(formerSnapshot).toBeTruthy();
+    const formerClosed = new Promise<number>((resolve) => formerOwner.socket.once('close', (code) => resolve(code)));
+    guestClient.send({ id: 'remove-former', type: 'remove', participantId: owner.credentials.participantId });
+    await guestClient.waitFor(isAck('remove-former'));
+    expect(await formerClosed).toBe(1008);
+    clients.splice(clients.indexOf(formerOwner), 1);
+
+    guestClient.send({ id: 'guest-round-two', type: 'save_draft', body: 'guest round two' });
+    lateClient.send({ id: 'late-round-two', type: 'save_draft', body: 'late round two' });
+    await guestClient.waitFor(isAck('guest-round-two'));
+    await lateClient.waitFor(isAck('late-round-two'));
+    guestClient.send({ id: 'guest-round-two-ready', type: 'ready' });
+    lateClient.send({ id: 'late-round-two-ready', type: 'ready' });
+    await guestClient.waitFor(isAck('guest-round-two-ready'));
+    await lateClient.waitFor(isAck('late-round-two-ready'));
+    const secondReveal = await guestClient.waitFor((message) => snapshotWithPhase('reveal')(message) && roomVersion(message) > replayVersion);
+    expect(JSON.stringify(secondReveal)).toContain('late round two');
+
+    guestClient.send({ id: 'delete-full', type: 'delete_room' });
+    await guestClient.waitFor(isAck('delete-full'));
+    const ended = await lateClient.waitFor(isType('room_ended'));
+    expect(record(ended)?.reason).toBe('deleted');
+    expect(roomVersion(firstWriting)).toBeGreaterThan(0);
   });
 
   it('rejects invalid/unauthorized protocol input, reconnects with state, and broadcasts deletion', async () => {

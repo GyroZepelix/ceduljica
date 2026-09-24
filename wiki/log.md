@@ -26,3 +26,11 @@ Use this shape for new entries:
 - Wiki pages changed: `wiki/architecture/room-core.md`, `wiki/index.md`, this maintenance log, one immutable Dream episode plus its catalog record, and the matching per-spec checkpoint ledger.
 - Verification: source and implementation evidence were re-read; memory safety, catalog/ledger identity, links, append-only preservation, and whitespace checks passed.
 - Notes: the final responsive client and Docker Compose deployment remain pending in later slices; no observation was added.
+
+## [2026-09-24] dream | responsive real-time client boundary
+
+- Trigger: `/dream` run after Gamemaster checkpoint `260924-1909-fun-sticky-note-rooms/02.02`.
+- Inputs: `src/client/`, `src/server/http-server.ts`, `src/domain/types.ts`, `src/domain/room-service.ts`, `tests/client/`, `tests/integration/`, and the completed 02.02 implementation packet.
+- Wiki pages changed: `wiki/architecture/room-core.md`, this maintenance log, `wiki/dreams/2026-09-24-2332-gamemaster-checkpoint-260924-1909-fun-sticky-note-rooms-02-02.md`, `wiki/dreams/episodes.jsonl`, and `wiki/dreams/by-spec/260924-1909-fun-sticky-note-rooms.md`.
+- Verification: implementation evidence and current source were re-read; memory safety, catalog/ledger identity, relative links, prior-history preservation, and whitespace checks passed.
+- Notes: Compose packaging and final system verification remain in 03.01; the reconnect countdown may display a small client/server clock-skew offset; no observation was added.

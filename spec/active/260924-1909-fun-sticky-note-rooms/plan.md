@@ -105,7 +105,7 @@ Disconnect deadlines, removal, ownership transfer, and all-ready evaluation are 
   - Acceptance: every required screen and responsive state is represented, the concept uses the confirmed Playful Plaza direction, and user approval is recorded.
   - Verification: artifact inspection, responsive-state checklist, `git diff --check`, focused design-contract review, and explicit user approval.
 
-- [ ] T02: Implement the authoritative room service and approved client experience.
+- [x] T02: Implement the authoritative room service and approved client experience.
   - Depends on: T01 approved
   - Scope: After dependency approval, establish the TypeScript application, SQLite persistence, room domain and participant-specific real-time protocol, then build the responsive React interface, reconnect behavior, how-to modal, animation, reduced-motion, and optional sound controls.
   - Expected areas: `package.json`, lockfile, TypeScript configuration, `src/`, database schema or migrations, `tests/`, approved design assets
@@ -183,7 +183,7 @@ At the end of T01, T02, and T03, run the medium-assurance focused boundary revie
 
 - [x] Planning complete and confirmed.
 - [x] T01 visual contract approved and verified.
-- [ ] T02 application implementation in progress: authoritative room core complete; responsive client pending.
+- [x] T02 authoritative room service and responsive real-time client complete and focused-review verified.
 - [ ] T03 packaged-system verification not started.
 - [ ] Final verification not run.
 

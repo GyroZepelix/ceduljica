@@ -440,6 +440,7 @@ function projectRoom(room: Room, participantId: string): RoomProjection {
         id: participant.id,
         nickname: participant.nickname,
         connected: participant.connected,
+        disconnectDeadline: participant.disconnectDeadline,
         isOwner: room.ownerParticipantId === participant.id,
         roundRole: activeIds.has(participant.id) ? 'active' : 'waiting',
         ready: room.round?.notes[participant.id]?.ready === true,

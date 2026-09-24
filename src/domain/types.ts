@@ -45,6 +45,7 @@ export interface ParticipantSummary {
   id: string;
   nickname: string;
   connected: boolean;
+  disconnectDeadline: number | null;
   isOwner: boolean;
   roundRole: 'active' | 'waiting';
   ready: boolean;

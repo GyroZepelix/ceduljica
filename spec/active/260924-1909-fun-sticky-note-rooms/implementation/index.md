@@ -4,7 +4,7 @@ Plan: `../plan.md`
 Mode: sliced
 Assurance: medium - synchronized multi-client state, pre-reveal note privacy, disconnect recovery, and persistent lifecycle have meaningful regression cost within a recoverable single-instance deployment.
 Review tier: scoped checks per slice, focused review at each segment boundary, and one final contract-quality review over the complete implementation.
-Current: `02.02`
+Current: `03.01`
 Expected implementation sessions: 4
 Implementation starting checkpoint: `1cec850d5876cdcb4f3cfc7b8678c8c36673533e`
 
@@ -68,7 +68,7 @@ Segment gate: all T02 checks pass and one focused implementation review covers s
 
 Boundary 02.01 -> 02.02: the client must consume a verified server-owned protocol that withholds other note bodies before reveal; combining both obscures whether privacy or synchronization failures originate in transitions or presentation.
 
-- [ ] 02.02: Build the responsive real-time client experience (packet: `./02-02-responsive-realtime-client.md`)
+- [x] 02.02: Build the responsive real-time client experience (packet: `./02-02-responsive-realtime-client.md`)
 
 Boundary 02.02 -> 03.01: Compose restart, persistence, and browser-to-browser checks require a complete integrated application and are costly enough to form a natural final verification session.
 
