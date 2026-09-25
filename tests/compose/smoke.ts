@@ -1,4 +1,6 @@
 import { execFileSync } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
+import type { RoomProjection } from '../../src/domain/types.js';
 import { WebSocket, type RawData } from 'ws';
 
 interface CreatedSession {
@@ -84,10 +86,29 @@ class Client {
 const baseUrl = new URL(process.env.COMPOSE_BASE_URL ?? 'http://127.0.0.1:3000');
 let owner: Client | undefined;
 let guest: Client | undefined;
+let fixtureToken: string | undefined;
+let fixtureDeleted = false;
 
 try {
   await waitForHealth();
+  // Vite intentionally preserves older local dist files. Check only the current
+  // entry points and their generated images, not stale hashes from prior builds.
+  const html = await readFile('dist/client/index.html', 'utf8');
+  const entryAssets = [...html.matchAll(/\/assets\/([^"']+)/g)].map(match => match[1]!);
+  const entryJs = entryAssets.find(name => name.endsWith('.js'));
+  assert(entryJs !== undefined, 'Current build has no JavaScript entry.');
+  const script = await readFile(`dist/client/assets/${entryJs}`, 'utf8');
+  const builtAssets = [...new Set([...entryAssets, ...[...script.matchAll(/\/assets\/(howto-[A-Za-z0-9_-]+\.png)/g)].map(match => match[1]!)])];
+  for (const name of builtAssets) {
+    const response = await fetch(new URL(`/assets/${encodeURIComponent(name)}`, baseUrl));
+    assert(response.status === 200, `Built asset ${name} returned ${String(response.status)}.`);
+    const served = Buffer.from(await response.arrayBuffer());
+    const local = await readFile(`dist/client/assets/${name}`);
+    assert(served.equals(local), `Packaged asset ${name} differs from the verified local build.`);
+  }
+  assert(builtAssets.filter(name => name.endsWith('.png')).length === 5, 'Expected five generated PNG assets.');
   const ownerSession = await create('/api/rooms', 'Compose Owner');
+  fixtureToken = ownerSession.credentials.sessionToken;
   const guestSession = await create(
     `/api/rooms/${encodeURIComponent(ownerSession.credentials.roomCode)}/join`,
     'Compose Guest',
@@ -103,6 +124,9 @@ try {
   const ownerBeforeRestart = await authenticatedSnapshot(ownerSession.credentials.sessionToken);
   assert(!ownerBeforeRestart.includes('compose guest persisted draft'), 'Owner snapshot disclosed the guest draft before reveal.');
   assert(ownerBeforeRestart.includes('compose owner persisted draft'), 'Owner draft was missing before restart.');
+  const before = JSON.parse(ownerBeforeRestart) as RoomProjection;
+  const identitiesBefore = before.participants.map(person => [person.id, person.avatarSlot]);
+  assert(new Set(before.participants.map(person => person.avatarSlot)).size === 2, 'Compose identities collided.');
 
   await owner.close();
   await guest.close();
@@ -120,6 +144,13 @@ try {
   assert(!JSON.stringify(ownerRestored).includes('compose guest persisted draft'), 'Restored owner projection disclosed guest draft.');
   assert(JSON.stringify(guestRestored).includes('compose guest persisted draft'), 'Ready guest draft did not survive Compose restart.');
   assert(!JSON.stringify(guestRestored).includes('compose owner persisted draft'), 'Restored guest projection disclosed owner draft.');
+  const restored = record(record(ownerRestored).room) as unknown as RoomProjection;
+  const restoredGuest = record(record(guestRestored).room) as unknown as RoomProjection;
+  assert(restored.roomId === before.roomId && restored.roundId === before.roundId && restored.phase === before.phase, 'Restart changed room/round/phase.');
+  assert(restored.self.participantId === ownerSession.credentials.participantId && restored.self.isOwner, 'Restart changed owner credentials/authority.');
+  assert(restoredGuest.self.participantId === guestSession.credentials.participantId && restoredGuest.ownNote?.ready === true, 'Restart changed guest credentials/readiness.');
+  assert(JSON.stringify(restored.participants.map(person => [person.id, person.avatarSlot])) === JSON.stringify(identitiesBefore), 'Restart changed avatar identity.');
+  assert(JSON.stringify(restoredGuest.participants.map(person => [person.id, person.avatarSlot])) === JSON.stringify(identitiesBefore), 'Clients disagree on restored avatars.');
 
   await owner.command({ type: 'ready' });
   const reveal = await guest.waitFor((message) => {
@@ -129,6 +160,8 @@ try {
   const revealText = JSON.stringify(reveal);
   assert(revealText.includes('compose owner persisted draft'), 'Reveal omitted owner note after restart.');
   assert(revealText.includes('compose guest persisted draft'), 'Reveal omitted guest note after restart.');
+  const revealed = record(record(reveal).room) as unknown as RoomProjection;
+  assert(JSON.stringify(revealed.revealedNotes?.map(note => [note.participantId, note.avatarSlot])) === JSON.stringify(identitiesBefore), 'Restart lost revealed author identity/order.');
 
   await owner.command({ type: 'delete_room' });
   const ended = record(await guest.waitFor((message) => record(message).type === 'room_ended'));
@@ -137,9 +170,16 @@ try {
     headers: { authorization: `Bearer ${ownerSession.credentials.sessionToken}` },
   });
   assert(removedSession.status === 404, `Deleted owner session returned ${String(removedSession.status)}.`);
+  fixtureDeleted = true;
 
-  process.stdout.write('Compose smoke passed: two-client privacy, restart persistence, resynchronization, reveal, and deletion.\n');
+  process.stdout.write(`Compose smoke passed: ${String(builtAssets.length)} byte-identical assets, two-client privacy, room/draft/credentials/avatar restart persistence, resynchronization, reveal attribution, and synthetic deletion.\n`);
 } finally {
+  // Even a failed assertion must not leave this test's synthetic room behind.
+  // Never enumerate or delete any pre-existing room.
+  if (fixtureToken && !fixtureDeleted) {
+    const cleanup = await Client.connect(baseUrl, fixtureToken);
+    try { await cleanup.command({ type: 'delete_room' }); } finally { await cleanup.close(); }
+  }
   await Promise.all([owner?.close(), guest?.close()]);
 }
 

@@ -42,3 +42,9 @@ Outcome: retained learning
 - **Session evidence or selection reason:** RoomScreen, NoteFlight and room-transitions tests prove existing round identity reuse, delayed-echo protection, stale Ready/debounce cancellation, immediate focus, content-free interruptible overlays and reduced motion. Focused built-browser checks exercised the integrated boundary.
 - **Expected future benefit:** Prevent stale private editors, duplicate cross-round commands, replayed restoration effects, and animation-dependent authoritative state when changing room UI transitions.
 - **Why this tier:** This replaces the obsolete CSS-only motion summary with supported client lifecycle responsibilities in the existing room-core topic, rather than promoting transient visual approval or runtime observations.
+
+## Gamemaster checkpoint: 260925-1219-ceduljica-annotation-driven-visual-fixes/02.02
+
+Date: 2026-09-25
+Dream log: [2026-09-25-1654-gamemaster-checkpoint-260925-1219-ceduljica-annotation-driven-visual-fixes-02-02.md](../2026-09-25-1654-gamemaster-checkpoint-260925-1219-ceduljica-annotation-driven-visual-fixes-02-02.md)
+Outcome: episodic recall only

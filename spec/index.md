@@ -11,7 +11,6 @@ Repository-local planning and execution artifacts.
 <!-- spec-items:active:start -->
 | Item | Kind | Status | Updated |
 | --- | --- | --- | --- |
-| [Ceduljica annotation-driven visual fixes](./active/260925-1219-ceduljica-annotation-driven-visual-fixes/plan.md) | work-item | planned | 2026-09-25 |
 <!-- spec-items:active:end -->
 
 ## Archive
@@ -20,6 +19,7 @@ Repository-local planning and execution artifacts.
 | Item | Kind | Status | Updated |
 | --- | --- | --- | --- |
 | [Fun Sticky Note Rooms](./archive/260924-1909-fun-sticky-note-rooms/plan.md) | work-item | completed | 2026-09-25 |
+| [Ceduljica annotation-driven visual fixes](./archive/260925-1219-ceduljica-annotation-driven-visual-fixes/plan.md) | work-item | completed | 2026-09-25 |
 <!-- spec-items:archive:end -->
 
 ## Templates

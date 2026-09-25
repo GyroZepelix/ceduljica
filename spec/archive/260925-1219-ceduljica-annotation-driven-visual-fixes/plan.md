@@ -94,7 +94,7 @@ Resolve all 13 annotations in capture `20260925-101448Z` with a recognizable, or
   - Expected areas: `src/client/`, `design/`, `tests/client/`, `tests/integration/static-client.test.ts` as needed.
   - Acceptance: assets load in a production build; landing, how-to, and shared primitives visibly resolve their annotation findings; user approves the artwork/shared presentation before dependent room integration.
   - Verification: focused component/asset/browser checks, common project checks, and one focused T01 review.
-- [ ] T02: Deliver and prove the note-first room experience.
+- [x] T02: Deliver and prove the note-first room experience.
   - Depends on: T01's usable, approved shared assets and components.
   - Slice: 02.01, compatible avatar allocation/projections, participant/author presentation, note-first room layout, flights, reveal centering, Owner stamp, and focused regression tests.
   - Slice: 02.02, integrated browser geometry/visual/transition coverage, complete desktop/phone acceptance, packaged asset and restart evidence, and final visual approval.
@@ -160,12 +160,12 @@ Review tier: medium. Scoped checks per slice; focused T01 review after 01.01; fo
 
 - [x] Planning complete and confirmed.
 - [x] T01 complete.
-- [ ] T02 complete.
-- [ ] Final verification and visual approval complete.
+- [x] T02 complete.
+- [x] Final verification and visual approval complete.
 
 ## Execution handoff
 
-Start from [implementation/index.md](./implementation/index.md). Current is 02.02, not started. T01 passed scoped/common checks, focused independent review and user visual approval; see its packet for evidence and preserved infrastructure interruptions. 02.01 passed scoped/common checks and focused disposable-browser verification; its packet records compatibility, motion, layout evidence and the preserved runtime-context discrepancy. T02 and final verification remain incomplete. Implementation/T01 starting checkpoint is `817997403e53bb230af8d86bce100cc687012aa4`; T02's starting checkpoint is `b06f913f219fb96ef96d883f6c7ad159240901f3`.
+[Implementation index](./implementation/index.md) Current is complete. T01 and T02 passed their required checks, focused independent reviews and user visual approvals; independent final whole-contract review passed with no findings. Each review used zero corrective reruns. [Verification](./verification.md) consolidates all 13 annotation mappings, 39 captures, browser/Compose checks, user-reported native 200% outcome and disclosed runtime/data evidence limits. Completed packet history is preserved. Implementation/T01 starting checkpoint is `817997403e53bb230af8d86bce100cc687012aa4`; T02's starting checkpoint is `b06f913f219fb96ef96d883f6c7ad159240901f3`. Terminal disposition requires separately approved helper archival and is recorded in item.yaml; implementation completion itself does not authorize outcome creation, Dream or a Git checkpoint.
 
 ```text
 Use twin-astra as the implementation agent.
