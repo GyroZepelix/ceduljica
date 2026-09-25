@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ApiError, createRoom, joinRoom } from './api.js';
+import { Mascot, PlazaBackdrop } from './Artwork.js';
 import { HowTo } from './HowTo.js';
 import { Header } from './RoomScreen.js';
 import type { CreatedSession } from './types.js';
@@ -55,6 +56,7 @@ export function Landing({ muted, onToggleMuted, onEntered, onTap, initialRoomCod
 
   return (
     <div className="app-shell landing-shell">
+      <PlazaBackdrop />
       <Header
         muted={muted}
         onHowTo={() => { onTap(); setShowHowTo(true); }}
@@ -62,7 +64,7 @@ export function Landing({ muted, onToggleMuted, onEntered, onTap, initialRoomCod
       />
       <main className="landing-main">
         <section className="hero-copy">
-          <div aria-hidden="true" className="peel"><span /></div>
+          <Mascot />
           <p className="eyebrow">A private little plaza for big ideas</p>
           <h1>Write it. Ready it. Reveal together.</h1>
           <p>Make one shared room for 2–12 people. No accounts, no public directory, just your invite link.</p>

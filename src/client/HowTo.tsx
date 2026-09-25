@@ -1,5 +1,18 @@
 import { useState, type ReactNode } from 'react';
 import { Modal } from './Modal.js';
+import createArt from './assets/howto-create.png';
+import inviteArt from './assets/howto-invite.png';
+import writeArt from './assets/howto-write.png';
+import readyArt from './assets/howto-ready.png';
+import revealArt from './assets/howto-reveal.png';
+
+const SCENES = [
+  [createArt, 'A sticky-note friend sets up a blank note in a new meeting space.'],
+  [inviteArt, 'A sticky-note friend invites geometric friends to gather.'],
+  [writeArt, 'A sticky-note friend uses a pencil on one private note.'],
+  [readyArt, 'A sticky-note friend signals ready with a check beside a finished note.'],
+  [revealArt, 'Four friends celebrate their notes revealed together on a shared board.'],
+] as const;
 
 const STEPS = [
   ['Create a room', 'Choose a display name, then share the private invite link with your group.'],
@@ -17,12 +30,13 @@ interface HowToProps {
 export function HowTo({ onClose, onTap }: HowToProps): ReactNode {
   const [step, setStep] = useState(0);
   const content = STEPS[step];
-  if (!content) return null;
+  const scene = SCENES[step];
+  if (!content || !scene) return null;
   return (
     <Modal title="How to use Ceduljica" onClose={onClose}>
       <p className="eyebrow">Step {step + 1} of {STEPS.length}</p>
-      <div aria-hidden="true" className={`howto-illustration howto-${String(step + 1)}`}>
-        <span className="peel peel-small"><span /></span>
+      <div className="howto-illustration">
+        <img alt={scene[1]} src={scene[0]} width={1536} height={1024} />
       </div>
       <h3>{content[0]}</h3>
       <p>{content[1]}</p>

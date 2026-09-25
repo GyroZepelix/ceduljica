@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { RoomProjection } from '../domain/types.js';
 import { ApiError, getSession, RoomRealtime } from './api.js';
+import { Mascot, PlazaBackdrop } from './Artwork.js';
 import { Landing } from './Landing.js';
 import { RoomScreen } from './RoomScreen.js';
 import { clearSession, loadSession, saveSession } from './storage.js';
@@ -126,8 +127,9 @@ export function App(): ReactNode {
     const content = terminalContent(terminal);
     return (
       <div className="app-shell terminal-shell">
+        <PlazaBackdrop />
         <main className="terminal-card paper-card" aria-live="assertive">
-          <div aria-hidden="true" className="peel peel-sad"><span /></div>
+          <Mascot calm />
           <h1 tabIndex={-1}>{content.title}</h1>
           <p>{content.body}</p>
           <button className="button primary" onClick={returnHome} type="button">{content.action}</button>

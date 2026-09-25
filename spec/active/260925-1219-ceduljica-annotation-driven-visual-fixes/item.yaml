@@ -1,0 +1,13 @@
+schema_version: 2
+id: 260925-1219-ceduljica-annotation-driven-visual-fixes
+title: Ceduljica annotation-driven visual fixes
+kind: work-item
+work_type: feature
+parent: null
+route: grill-to-spec
+status: planned
+superseded_by: null
+created_at: '2026-09-25T12:19:12+02:00'
+updated_at: '2026-09-25T12:34:14+02:00'
+external_refs: []
+wiki_refs: []

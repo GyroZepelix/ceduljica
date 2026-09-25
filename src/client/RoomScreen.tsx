@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { ParticipantSummary, RoomProjection } from '../domain/types.js';
+import { NoteMark, PlazaBackdrop } from './Artwork.js';
 import { HowTo } from './HowTo.js';
 import { Modal } from './Modal.js';
 import type { RoomCommand } from './types.js';
@@ -59,6 +60,7 @@ export function RoomScreen(props: RoomScreenProps): ReactNode {
 
   return (
     <div className="app-shell room-shell">
+      <PlazaBackdrop />
       <Header
         muted={muted}
         onHowTo={() => { onTap(); setShowHowTo(true); }}
@@ -126,7 +128,7 @@ export function Header({ muted, phase, onHowTo, onToggleMuted }: HeaderProps): R
   return (
     <header className="site-header">
       <a aria-label="Ceduljica home" className="brand" href="/">
-        <span aria-hidden="true" className="brand-mark"><span /></span>
+        <NoteMark />
         <span>Ceduljica</span>
       </a>
       {phase ? <span className="phase-tab">{phase}</span> : null}

@@ -10,7 +10,8 @@ describe('responsive and motion contract', () => {
     expect(css).toContain('.note-board.notes-dense { grid-template-columns: repeat(4');
     expect(css).toContain('.mobile-note-progress { display: block; position: sticky');
     expect(css).toContain('@media (prefers-reduced-motion: reduce)');
-    expect(css).toContain('.app-shell { animation: none; }');
+    expect(css).toContain('.note-motif { animation: none; }');
+    expect(css).toContain('.plaza-backdrop[data-paused="true"] .note-motif { animation-play-state: paused; }');
     expect(css).toContain('outline: 3px solid var(--focus)');
     expect(css).toContain('min-width: 320px');
   });

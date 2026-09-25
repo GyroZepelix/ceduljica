@@ -1,6 +1,6 @@
 # Ceduljica generated concept registry
 
-These PNGs are original T01 concept references, not production UI. `../README.md` and the authored SVG artifacts remain the deterministic visual contract. Generated words, controls, layouts, and characters are non-authoritative unless explicitly operationalized there.
+These PNGs are original concept references, preserved byte-for-byte, not production UI. Current guidance is in [`../README.md`](../README.md) and [`../production-artwork.md`](../production-artwork.md); older SVG panel/avatar/layout treatments are non-binding where superseded by the canonical follow-up plan. Generated words, controls and layouts never authorize product behavior.
 
 No clipboard screenshot, Nintendo material, unrelated local file, credential, or user data was uploaded. The only referenced image approved for derivative calls is Ceduljica's own generated `ceduljica-motif-world-concept.png`.
 
@@ -70,4 +70,4 @@ All four calls below were explicitly approved with the same settings and `cedulj
 
 ## Reuse boundary
 
-Useful original atmosphere, shape language, pose ideas, palette behavior, framing, and density cues may inform the authored SVG contract. Do not trace generated pixels. Do not adopt generated text, logo-like marks, navigation, rich-text controls, extra features, or character variants that conflict with the named Peel/Dot/Zip/Loop definitions.
+Useful original atmosphere, shape language, pose ideas, palette behavior, framing and density cues inform production redraws. The follow-up permits appropriate original art extraction/derivation/redrawing, but not poor crops, sheet backgrounds or clipped silhouettes. Original PNG bytes remain unchanged. Do not adopt generated text, logo-like marks, navigation, rich-text controls or extra features. New how-to PNGs have a separate approved provenance registry; this historical upload approval does not authorize new reference uploads.

@@ -1,6 +1,6 @@
 # Ceduljica visual contract
 
-Status: **approved on 2026-09-24**. This package is the binding visual contract for application implementation.
+Status: original direction approved on 2026-09-24; shared artwork foundation updated and visually approved on 2026-09-25. The canonical follow-up plan governs its changed artwork, panels, avatars and layouts. Older SVG mockups remain prior composition references, not binding targets for those changed treatments. See [production artwork and provenance](./production-artwork.md) for the implemented 01.01 foundation and exact approved generation prompts.
 
 Ceduljica's revised **Playful Plaza** direction is an original, high-energy microgame party: saturated blocks, ink-heavy outlines, comic bursts, skewed cards, punchy type, and a small cast of sticker-like plaza characters. It borrows no characters, icons, layouts, sounds, screenshots, or trade dress from Nintendo or any other game. The folded-corner sticky mascot, sticker cast, burst language, wordmark, and scenes in this package are original references created for Ceduljica.
 
@@ -26,17 +26,17 @@ SVGs are implementation references, not production markup and not pixel-perfect 
 
 [`ceduljica-motif-world-concept.png`](./concepts/ceduljica-motif-world-concept.png) is the selected style-and-feeling target. Its original Ceduljica energy, shape language, framing, color behavior, motif treatment, plaza atmosphere, and geometric character feel are binding direction. The authored rules below operationalize those qualities so the later app does not merely cite the image or copy generated pixels.
 
-The four source sheets derived from that target help resolve poses, pattern density, paper framing, and responsive composition. No clipboard screenshot or Nintendo material was uploaded; the selected Ceduljica PNG was the only referenced image. `style-tile.svg`, the two key-screen sheets, and this document remain the deterministic implementation contract.
+The four source sheets derived from that target help resolve poses, pattern density, paper framing, and responsive composition. No clipboard screenshot or Nintendo material was uploaded; the selected Ceduljica PNG was the only referenced image. The SVG sheets retain unchanged color, typography, accessibility and state references; changed presentation is specified by the canonical follow-up plan and the current production guidance.
 
 Binding translation from the selected target:
 
 - Build a sunny open-air plaza around the interface: warm paving, coral architecture shapes, sky openings, organic green edge forms, loose bunting, and floating paper accents. These stay abstract and original rather than becoming a literal scenic illustration on every screen.
 - Keep Peel/Dot/Zip/Loop at the perimeter, never behind user copy or over controls. Use one or two pals per key view, with deep-purple outlines, rosy cheek accents, tiny limbs, elastic poses, and one readable expression.
-- Anchor every task with a large calm paper surface occupying roughly half or more of the working region. Folded corners, a single tape tab, and a hard warm offset may decorate it; the input itself stays level and texture-free.
-- Use the low-contrast motif as warm paved atmosphere, broad curved color movement as framing, and bunting or action ticks as the one energetic accent. Preserve generous sky/canvas gaps so the scene breathes.
+- Supporting panels use warm opaque tints. The follow-up room target is a standalone writable yellow sticky note rather than a large enclosing white card; full room restructuring follows the shared foundation. The input itself stays level and texture-free.
+- Use one subtle repeated sticky-note outline as warm paved atmosphere, restrained recognizable arch/plant scenery at wide-screen edges, and the integrated multicolor header ribbon as the energetic accent. Preserve generous sky/canvas gaps so the scene breathes.
 - Decorative backdrops may use very soft tonal depth; controls, cards, notes, forms, and dialogs use deterministic flat fills and sharp contrast.
 
-Generated details that are explicitly **not approved product UI** include every generated word or logo-like mark, navigation rail, rich-text/image control, heart-as-feature, multiple-note composer, envelope-like mascot variant, decorative slogan, moustache-like expression, paperclip, and any implied feature outside the canonical plan. Do not trace generated copy, icons, screen geometry, architecture, or pixels. Production uses the named Peel/Dot/Zip/Loop geometry and the exact state/layout contract documented below.
+Generated details that are explicitly **not approved product UI** include every generated word or logo-like mark, navigation rail, rich-text/image control, heart-as-feature, multiple-note composer, envelope-like mascot variant, decorative slogan, moustache-like expression, paperclip, and any implied feature outside the canonical plan. Never adopt generated copy or controls. Production may use original concept-inspired redraws and separately approved action-specific generated illustrations; do not use poor sheet crops or baked-in source-sheet backgrounds. Room identity is not inferred from illustration characters. See the production registry for actual asset usage.
 
 ## Foundation
 
@@ -53,7 +53,7 @@ Generated details that are explicitly **not approved product UI** include every 
 | Token | Value | Use |
 | --- | --- | --- |
 | `canvas` | `#FFF6DD` | Warm page background. |
-| `surface` | `#FFFFFF` | Cards, modals, inputs. |
+| `surface` | `#FFF9E9` | Warm opaque cards, modals, inputs; entry cards also use pale yellow `#FFF1CA` and green `#EEF3DA`. |
 | `ink` | `#24154A` | Primary text and bold outlines. |
 | `ink-muted` | `#5C5178` | Secondary text; never critical state alone. |
 | `sky` | `#27B2F6` | Primary action fill with ink text. |
@@ -88,7 +88,7 @@ Use a 4 px base with preferred steps `4, 8, 12, 16, 24, 32, 48, 64`. Interactive
 - Small chip radius: 12 px.
 - Input/button radius: 16 px.
 - Card/modal radius: 24 px.
-- Sticky note radius: 10 px with a 26 px folded corner.
+- Shared revealed-note silhouette: clipped top-right 26 px corner with an ink crease and warm underside, never a white triangle protruding past a rectangle.
 - Outline: 3 px `ink`; selected or emphasized: 4 px. Small interior dividers remain 1–2 px.
 - Shadow: hard `5px 6px 0 rgba(36,21,74,.20)` for controls/cards and `0 12px 30px rgba(36,21,74,.18)` for modal layers. Shadows never encode state.
 - Skew: hero cards and note stickers may rotate from -1.5° to +1.5°; forms, multiline editors, tables, dialogs, and destructive controls remain level.
@@ -96,11 +96,11 @@ Use a 4 px base with preferred steps `4, 8, 12, 16, 24, 32, 48, 64`. Interactive
 
 ### Original motif field and plaza framing
 
-The page canvas translates the selected target's sunny paved-plaza feeling into a low-contrast Ceduljica-only repeat made from folded sticky corners, Peel/Dot/Zip/Loop silhouettes, tiny checks, paper diamonds, and four-ray sparkles. Motifs use `ink`, lavender, sky, and coral at 5–9% opacity on `canvas`; each repeat cell is at least 88 x 72 px so it reads as atmosphere rather than content.
+The page canvas uses exactly one recognizable folded-note outline repeated on a 112 x 96 px cell, in muted warm ink at 15% opacity. No mixed dots, diagonal stripes, generic blobs or competing character repeat remains.
 
-At wide sizes, one shallow scenic edge may frame the canvas: abstract coral arches or steps across the upper 15%, and organic mint/green mounds across the lower 12%. At mobile sizes this collapses to two or three curved color fields so content never competes with a miniature landscape. Sky-blue openings and warm paving create depth, but no photograph, texture bitmap, or literal generated architecture is copied.
+At wide sizes, restrained original coral arch/steps and potted foliage frame the far edges. Scenery is hidden below 720 px, giving controls and copy priority. The background is pointer-transparent and contains no user content.
 
-- The motif sits only on page canvas. White forms, note editors, status panels, modals, sticky notes, and destructive confirmations remain opaque and pattern-free.
+- The motif sits only on page canvas. Warm forms, note editors, status panels, modals, sticky notes, and destructive confirmations remain opaque and pattern-free.
 - A screen may use one original plaza ribbon: rounded color tabs, loose triangular bunting on a curved ink cord, or a broad wavy stack of sky/coral/mint shapes. Do not use black/yellow hazard stripes, garlic-like repeats, or a copied reference-site border, composition, logo, or layout.
 - Standard motion drifts the motif horizontally by one repeat cell over 48 seconds with linear timing. It has no parallax, does not react to pointer movement, pauses when the page is hidden, and never moves foreground controls.
 - `prefers-reduced-motion: reduce` makes the same motif completely static. A user never loses information or state feedback when drift is disabled.
@@ -110,14 +110,14 @@ At wide sizes, one shallow scenic edge may frame the canvas: abstract coral arch
 
 ### Header
 
-The punchy wordmark and original folded-note face sit left inside a sticker-like lockup. A thin curved bunting or rounded plaza-ribbon edge may run below the header, echoing the selected target without becoming a hazard stripe. Room views show phase as text (`Lobby`, `Writing`, `Reveal`) in a compact slanted tab. Right-side controls are **How to use** where relevant and a 44 px sound toggle labelled `Sound on` or `Muted`; its icon is accompanied by visible text at desktop and an accessible name plus pressed state on compact mobile.
+The punchy wordmark and simple original vector folded-note face sit left. A continuous sky/coral/yellow/mint ribbon is attached to the opaque warm-tinted full-width header, not floating over the page repeat. Room views show phase as text (`Lobby`, `Writing`, `Reveal`) in a compact slanted tab. Right-side controls are **How to use** where relevant and a 44 px sound toggle labelled `Sound on` or `Muted`; its icon is accompanied by visible text at desktop and an accessible name plus pressed state on compact mobile.
 
 ### Buttons
 
 - Primary: saturated sky fill, 3 px ink outline, verb-first label, hard 5 px bottom-right offset, and optional tiny burst ticks outside the control.
-- Secondary: white fill, ink outline.
+- Secondary: warm cream fill, ink outline.
 - Quiet: underlined ink text or borderless control, still 44 px tall.
-- Danger: white fill with danger outline, trash icon, and explicit label such as `Delete room`.
+- Danger: warm cream fill with danger outline, trash icon, and explicit label such as `Delete room`.
 - Disabled: neutral fill, lower contrast, lock or explanatory adjacent text, and `disabled` semantics. Do not communicate disabled state through opacity alone.
 - Focus: 3 px purple outside ring with a 2 px canvas gap, visible on every surface.
 
@@ -127,9 +127,9 @@ Labels stay above controls. Help and error text reserve space below. Invalid sta
 
 ### Participant rows and ownership
 
-Every person row has a geometric avatar, name, and textual status:
+The follow-up target is 12 stable automatically assigned character/color variants, shared by participant rows and revealed authors. This is pending room integration; the existing four-shape mapping is not a binding target. Every person row retains a name and textual status:
 
-- Owner: key icon and `Owner` chip.
+- Owner: explicit `Owner` text; the follow-up Owner stamp is pending room integration.
 - Writing: pencil icon and `Writing`.
 - Ready: check icon and `Ready`.
 - Waiting: hourglass icon and `Next round`.
@@ -142,7 +142,7 @@ Icons and color supplement, rather than replace, these labels. Owner-only contro
 
 - Peel is the leading guide: a yellow folded-corner square with deep-purple outline, rosy cheeks, simple face, tiny round-ended limbs, and no costume or prop.
 - Dot is a sky circle, Zip a mint triangle, and Loop a lavender rounded square. Their silhouette determines identity; accessories, hair, clothing, moustaches, and envelope folds are not part of the production cast.
-- Standard views use at most two pals, each no larger than 18% of the viewport's short edge. They may lean in from a perimeter, jump beside a phase heading, or celebrate outside a board.
+- Standard views use at most two pals; the current hero/terminal mascot is 160 x 144 px on desktop and 130 x 117 px on phones. Action-specific how-to scenes have a reserved 3:2 region, at most 420 px wide. They may lean in from a perimeter, jump beside a phase heading, or celebrate outside a board.
 - Character pose never carries meaning alone. Status text, icons, and semantic state remain complete when characters are hidden.
 - At 320 px width or 200% zoom, secondary pals disappear before content is compressed.
 
@@ -223,14 +223,14 @@ No sound plays before a user gesture. Default is on after gesture, subject to br
 ## Responsive handoff
 
 - Breakpoints are content-driven: one-column entry and participant layouts below 720 px; two-column room layout from 720 px; reveal grid changes at approximately 720, 960, and 1180 px.
-- Desktop room pages use a main phase card and 300 px participant rail. Mobile puts phase progress above the editor and participants in a collapsible `People (4)` disclosure after the primary action.
+- Lobby/writing currently retain a main region and 300 px participant rail; standalone note restructuring follows in room integration. Reveal's approved follow-up target is an open board centered in the complete available width, with no empty participant track. Mobile keeps phase progress above the editor and participants in a collapsible `People (4)` disclosure after the primary action.
 - Dialogs fit within `min(680px, viewport - 32px)` and scroll internally only when viewport height requires it.
 - Respect safe-area insets on mobile. Nothing essential is fixed to the viewport except optional status banners, which must not cover controls.
 - Do not reorder controls with CSS in a way that diverges from DOM and keyboard order.
 
 ## Approval checklist
 
-The approver should inspect both SVG sheets at full size and confirm:
+The follow-up approver must inspect built-browser evidence (not only old SVG sheets) and confirm:
 
 - [ ] The revised high-energy Playful Plaza mood, bold outline system, skewed panels, comic bursts, punchy type, original Peel/Dot/Zip/Loop sticker cast, low-contrast repeating motif, and original plaza framing feel suitable.
 - [ ] Entry and the five-step how-to are understandable.
@@ -238,4 +238,4 @@ The approver should inspect both SVG sheets at full size and confirm:
 - [ ] Desktop and mobile layouts, including 1 and 12 notes, are a sound implementation target.
 - [ ] Motion, reduced-motion, sound, keyboard, focus, and live-region guidance are acceptable.
 
-Explicit approval of this package is required before slice `02.01` can become Current.
+Explicit human approval of the actual follow-up artwork/shared presentation is required before dependent room integration. The 2026-09-24 approval does not substitute for this gate.
