@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.playwright
+.playwright-cli
+node_modules
+dist
+coverage
+data
+spec
+wiki
+design
+npm-debug.log*

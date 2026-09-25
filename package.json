@@ -14,7 +14,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
-    "build": "tsc -p tsconfig.build.json && vite build --config vite.config.ts"
+    "build": "tsc -p tsconfig.build.json && vite build --config vite.config.ts",
+    "test:e2e": "sh tests/e2e/run-browser-contract.sh",
+    "test:compose": "tsx tests/compose/smoke.ts"
   },
   "dependencies": {
     "better-sqlite3": "13.0.3",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/cli": "0.1.19",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.7",
     "@types/better-sqlite3": "9.6.0",

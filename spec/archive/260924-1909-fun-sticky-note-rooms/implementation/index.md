@@ -4,7 +4,7 @@ Plan: `../plan.md`
 Mode: sliced
 Assurance: medium - synchronized multi-client state, pre-reveal note privacy, disconnect recovery, and persistent lifecycle have meaningful regression cost within a recoverable single-instance deployment.
 Review tier: scoped checks per slice, focused review at each segment boundary, and one final contract-quality review over the complete implementation.
-Current: `03.01`
+Current: `complete`
 Expected implementation sessions: 4
 Implementation starting checkpoint: `1cec850d5876cdcb4f3cfc7b8678c8c36673533e`
 
@@ -75,11 +75,11 @@ Boundary 02.02 -> 03.01: Compose restart, persistence, and browser-to-browser ch
 ### T03: Package and verify the complete self-hosted system
 
 Depends on: T02
-Segment starting checkpoint: unrecorded
+Segment starting checkpoint: `a13002da2c1251d5a4425fbdccbae3c1db0b8ace`
 Segment acceptance: a clean Compose deployment passes health, multi-client flow, persistence restart, lifecycle, responsive, accessibility, and whole-plan acceptance checks.
 Segment gate: focused final-segment review plus one final contract-quality review over the entire plan and evidence.
 
-- [ ] 03.01: Package and prove the Compose system (packet: `./03-01-compose-system-verification.md`)
+- [x] 03.01: Package and prove the Compose system (packet: `./03-01-compose-system-verification.md`)
 
 ## Discoveries and blockers
 

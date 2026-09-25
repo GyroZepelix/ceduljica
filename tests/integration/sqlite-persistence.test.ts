@@ -62,6 +62,27 @@ describe('SQLite persistence', () => {
     database.cleanup();
   });
 
+  it('removes rooms that expired while the service was offline during startup recovery', () => {
+    const database = temporaryDatabase();
+    const clock = new FakeClock();
+    let store = new SqliteRoomStore(database.path);
+    let service = new RoomService(store, clock, new DeterministicIdentities());
+    const owner = service.create('Owner');
+    const guest = service.join(owner.credentials.roomCode, 'Guest');
+    store.close();
+
+    clock.advance(ROOM_TTL_MS);
+    store = new SqliteRoomStore(database.path);
+    service = new RoomService(store, clock, new DeterministicIdentities());
+    expect(service.recoverAfterRestart()).toEqual([]);
+    expect(store.list()).toEqual([]);
+    expect(() => service.snapshot(owner.credentials.sessionToken)).toThrow();
+    expect(() => service.snapshot(guest.credentials.sessionToken)).toThrow();
+
+    store.close();
+    database.cleanup();
+  });
+
   it('rolls back aggregate and session writes together on a constraint failure', () => {
     const database = temporaryDatabase();
     const clock = new FakeClock();

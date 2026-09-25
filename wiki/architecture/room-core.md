@@ -21,6 +21,13 @@ Read this page when changing Ceduljica room lifecycle behavior, real-time client
 - `RoomRealtime` reconnects with the opaque session token, rejects pending commands when the socket drops, verifies the session over HTTP, and applies bounded retry delay. Every accepted snapshot replaces client server-state; a rejected command triggers an authoritative refresh instead of an optimistic phase, owner, readiness, or reveal transition.
 - Domain tests use a fake clock and deterministic identities; integration tests cover participant-specific HTTP/WebSocket privacy, reconnect resynchronization, SQLite restart reconstruction, expiry/deletion cleanup, transaction rollback, coincident lifecycle orderings, the complete owner/waiting/replay/transfer/removal flow, and static client delivery.
 
+## Packaged deployment boundary
+
+- `compose.yaml` runs one `app` service, publishes a configurable host port, and mounts the named `ceduljica-data` volume at `/data`; the application stores SQLite at `/data/ceduljica.sqlite`. Ordinary `restart`, rebuild, and `down` operations retain the volume.
+- The multi-stage `Dockerfile` compiles native SQLite support in the full pinned Node 26 Bookworm build image, then copies only production modules and built output into a non-root Node 26 slim runtime. Container and Compose health checks call `/health` only after database bootstrap and startup expiry cleanup complete.
+- `README.md` is the operator contract: use one app process, preserve the volume for routine operation, require an explicit `down --volumes` only for total data destruction, and put internet-facing deployments behind HTTPS termination that forwards WebSocket upgrades. Room links and session tokens remain bearer secrets; the service is unlisted, not end-to-end encrypted.
+- `tests/e2e/` proves multi-context browser behavior and responsive/accessibility fixtures. `tests/compose/smoke.ts` creates a disposable two-client room against Compose, checks pre-reveal privacy, restarts only the app, verifies SQLite-backed resynchronization, completes reveal, and deletes the room without removing the volume.
+
 ## Responsive client boundary
 
 - The React client keeps only the current participant's editable draft outside the server projection. Before reveal, UI components receive no other note body; after reveal, they render only the server-provided stable named-note order.
@@ -28,4 +35,4 @@ Read this page when changing Ceduljica room lifecycle behavior, real-time client
 - Phase changes move focus to the new heading. Modal content is portaled while the application root is inert, traps focus, restores the opener, and gives destructive confirmation a safe initial action.
 - Motion is CSS-only and removed under `prefers-reduced-motion`. Optional synthesized sounds require an earlier user gesture, expose all state through simultaneous text and visuals, persist mute locally, and close the audio context when muted.
 
-Sources: `src/domain/room-service.ts`, `src/db/sqlite-room-store.ts`, `src/server/http-server.ts`, `src/client/`, `tests/domain/`, `tests/integration/`, `tests/client/`, `spec/active/260924-1909-fun-sticky-note-rooms/implementation/02-01-authoritative-room-core.md`, and `spec/active/260924-1909-fun-sticky-note-rooms/implementation/02-02-responsive-realtime-client.md`.
+Sources: `src/domain/room-service.ts`, `src/db/sqlite-room-store.ts`, `src/server/http-server.ts`, `src/client/`, `Dockerfile`, `compose.yaml`, `README.md`, `tests/domain/`, `tests/integration/`, `tests/client/`, `tests/e2e/`, `tests/compose/`, `spec/archive/260924-1909-fun-sticky-note-rooms/implementation/02-01-authoritative-room-core.md`, `spec/archive/260924-1909-fun-sticky-note-rooms/implementation/02-02-responsive-realtime-client.md`, and `spec/archive/260924-1909-fun-sticky-note-rooms/implementation/03-01-compose-system-verification.md`.

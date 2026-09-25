@@ -112,7 +112,7 @@ Disconnect deadlines, removal, ownership transfer, and all-ready evaluation are 
   - Acceptance: all room and recovery rules work through server-owned transitions, other note bodies are absent before reveal, the approved interface works on phone and desktop, and focused automated checks pass.
   - Verification: lint, type-check, unit and integration tests, client tests, production build, focused privacy inspection, and focused segment review.
 
-- [ ] T03: Package and verify the complete self-hosted system.
+- [x] T03: Package and verify the complete self-hosted system.
   - Depends on: T02
   - Scope: Add Docker Compose delivery, persistent SQLite volume, health and startup behavior, operator documentation, multi-client browser coverage, restart and cleanup checks, and final contract verification.
   - Expected areas: `Dockerfile`, `compose.yaml`, `.dockerignore`, environment example, `README.md`, browser and Compose test areas
@@ -184,8 +184,8 @@ At the end of T01, T02, and T03, run the medium-assurance focused boundary revie
 - [x] Planning complete and confirmed.
 - [x] T01 visual contract approved and verified.
 - [x] T02 authoritative room service and responsive real-time client complete and focused-review verified.
-- [ ] T03 packaged-system verification not started.
-- [ ] Final verification not run.
+- [x] T03 packaged-system verification complete.
+- [x] Final verification passed.
 
 ## Execution handoff
 

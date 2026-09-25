@@ -44,7 +44,7 @@ Outcome: retained learning
   > - The responsive client should reconnect with its opaque session token, replace local server state with each authoritative snapshot, and keep only its own editable draft locally; it must not infer another participant's hidden note or fabricate owner, phase, readiness, or reveal state.
   > - Domain tests use a fake clock and deterministic identities; integration tests cover participant-specific HTTP/WebSocket privacy, reconnect resynchronization, SQLite restart reconstruction, expiry/deletion cleanup, transaction rollback, and coincident lifecycle orderings.
   >
-  > Sources: `src/domain/room-service.ts`, `src/db/sqlite-room-store.ts`, `src/server/http-server.ts`, `tests/domain/`, `tests/integration/`, and `spec/active/260924-1909-fun-sticky-note-rooms/implementation/02-01-authoritative-room-core.md`.
+  > Sources: `src/domain/room-service.ts`, `src/db/sqlite-room-store.ts`, `src/server/http-server.ts`, `tests/domain/`, `tests/integration/`, and `spec/archive/260924-1909-fun-sticky-note-rooms/implementation/02-01-authoritative-room-core.md`.
 - **Destination and classification:** `wiki/architecture/room-core.md` - `Topic-specific dynamic knowledge`
 - **Session evidence or selection reason:** The completed 02.01 packet, authoritative source, and 20 passing domain/integration tests establish the room authority, privacy projection, persistence, timing, and protocol boundaries; the canonical plan also proposed documenting these after verified implementation.
 - **Expected future benefit:** Client and server work can preserve the privacy and authority boundaries, use the intended reconnect contract, and choose the correct deterministic verification seams without reconstructing the architecture from multiple source files.
@@ -72,8 +72,28 @@ Outcome: retained learning
   > - Phase changes move focus to the new heading. Modal content is portaled while the application root is inert, traps focus, restores the opener, and gives destructive confirmation a safe initial action.
   > - Motion is CSS-only and removed under `prefers-reduced-motion`. Optional synthesized sounds require an earlier user gesture, expose all state through simultaneous text and visuals, persist mute locally, and close the audio context when muted.
   >
-  > Sources: `src/domain/room-service.ts`, `src/db/sqlite-room-store.ts`, `src/server/http-server.ts`, `src/client/`, `tests/domain/`, `tests/integration/`, `tests/client/`, `spec/active/260924-1909-fun-sticky-note-rooms/implementation/02-01-authoritative-room-core.md`, and `spec/active/260924-1909-fun-sticky-note-rooms/implementation/02-02-responsive-realtime-client.md`.
+  > Sources: `src/domain/room-service.ts`, `src/db/sqlite-room-store.ts`, `src/server/http-server.ts`, `src/client/`, `tests/domain/`, `tests/integration/`, `tests/client/`, `spec/archive/260924-1909-fun-sticky-note-rooms/implementation/02-01-authoritative-room-core.md`, and `spec/archive/260924-1909-fun-sticky-note-rooms/implementation/02-02-responsive-realtime-client.md`.
 - **Destination and classification:** `wiki/architecture/room-core.md` - `Topic-specific dynamic knowledge`
 - **Session evidence or selection reason:** The completed 02.02 packet, current source, 28 passing tests, real-server phone/desktop Playwright evidence, and the passed focused T02 review establish the production client boundary, reconnect behavior, shared responsive controls, focus handling, and sound/motion constraints.
 - **Expected future benefit:** Client, protocol, and deployment work can preserve server authority and hidden-note privacy, keep desktop and mobile owner controls aligned, use the intended reconnect reconciliation path, and avoid regressing modal, reduced-motion, or sound activation behavior.
 - **Why this tier:** These are stable, repository-specific integration contracts likely to guide later client and deployment changes within the existing room architecture page; they are too component-specific for a repository-wide convention and too well-supported for a tentative observation.
+
+## Gamemaster checkpoint: 260924-1909-fun-sticky-note-rooms/03.01
+
+Date: 2026-09-25
+Dream log: [2026-09-25-0926-gamemaster-checkpoint-260924-1909-fun-sticky-note-rooms-03-01.md](../2026-09-25-0926-gamemaster-checkpoint-260924-1909-fun-sticky-note-rooms-03-01.md)
+Outcome: retained learning
+
+### Packaged self-hosted boundary
+
+- **Exact written text:**
+  > ## Packaged deployment boundary
+  >
+  > - `compose.yaml` runs one `app` service, publishes a configurable host port, and mounts the named `ceduljica-data` volume at `/data`; the application stores SQLite at `/data/ceduljica.sqlite`. Ordinary `restart`, rebuild, and `down` operations retain the volume.
+  > - The multi-stage `Dockerfile` compiles native SQLite support in the full pinned Node 26 Bookworm build image, then copies only production modules and built output into a non-root Node 26 slim runtime. Container and Compose health checks call `/health` only after database bootstrap and startup expiry cleanup complete.
+  > - `README.md` is the operator contract: use one app process, preserve the volume for routine operation, require an explicit `down --volumes` only for total data destruction, and put internet-facing deployments behind HTTPS termination that forwards WebSocket upgrades. Room links and session tokens remain bearer secrets; the service is unlisted, not end-to-end encrypted.
+  > - `tests/e2e/` proves multi-context browser behavior and responsive/accessibility fixtures. `tests/compose/smoke.ts` creates a disposable two-client room against Compose, checks pre-reveal privacy, restarts only the app, verifies SQLite-backed resynchronization, completes reveal, and deletes the room without removing the volume.
+- **Destination and classification:** `wiki/architecture/room-core.md` - `Topic-specific dynamic knowledge`
+- **Session evidence or selection reason:** The completed 03.01 packet, archived outcome and verification, Docker/Compose source, passing browser and Compose restart checks, and both passed independent reviews establish the single-process deployment, persistence, health, cleanup, privacy, and operator boundaries.
+- **Expected future benefit:** Future packaging and operations work can preserve the authoritative one-process topology, native build/runtime split, named-volume lifecycle, HTTPS trust boundary, and the required browser-plus-restart verification seams without reconstructing them from implementation history.
+- **Why this tier:** These are stable, repository-specific deployment and verification contracts likely to guide future maintenance of the room system; they fit the existing focused architecture page, are narrower than a repository-wide convention, and have stronger support and reuse than a tentative observation.

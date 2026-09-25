@@ -34,3 +34,11 @@ Use this shape for new entries:
 - Wiki pages changed: `wiki/architecture/room-core.md`, this maintenance log, `wiki/dreams/2026-09-24-2332-gamemaster-checkpoint-260924-1909-fun-sticky-note-rooms-02-02.md`, `wiki/dreams/episodes.jsonl`, and `wiki/dreams/by-spec/260924-1909-fun-sticky-note-rooms.md`.
 - Verification: implementation evidence and current source were re-read; memory safety, catalog/ledger identity, relative links, prior-history preservation, and whitespace checks passed.
 - Notes: Compose packaging and final system verification remain in 03.01; the reconnect countdown may display a small client/server clock-skew offset; no observation was added.
+
+## [2026-09-25] implement | packaged self-hosted workflow
+
+- Trigger: verified Current `03.01` added the Docker Compose operating boundary and complete browser/packaged-system checks.
+- Inputs: `Dockerfile`, `compose.yaml`, `.env.example`, `README.md`, `tests/e2e/`, `tests/compose/`, and `spec/archive/260924-1909-fun-sticky-note-rooms/implementation/03-01-compose-system-verification.md`.
+- Wiki pages changed: `wiki/architecture/room-core.md` and this maintenance log.
+- Verification: clean Node checks and browser E2E passed; Compose built the Node 26 image, reached health, passed native SQLite restart/persistence/privacy/deletion smoke, stopped without `-v`, and retained the named data volume.
+- Notes: the architecture remains intentionally single-process; production HTTPS and WebSocket forwarding are operator responsibilities.
