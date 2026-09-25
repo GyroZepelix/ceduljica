@@ -10,6 +10,7 @@ import type { RoomCommand } from '../../src/client/types.js';
 
 const owner: ParticipantSummary = {
   id: 'owner-id',
+  avatarSlot: 0,
   nickname: 'Maya',
   connected: true,
   disconnectDeadline: null,
@@ -19,6 +20,7 @@ const owner: ParticipantSummary = {
 };
 const guest: ParticipantSummary = {
   id: 'guest-id',
+  avatarSlot: 1,
   nickname: 'Jon',
   connected: true,
   disconnectDeadline: null,
@@ -30,6 +32,7 @@ const guest: ParticipantSummary = {
 function projection(overrides: Partial<RoomProjection> = {}): RoomProjection {
   return {
     roomId: 'room-id',
+    roundId: null,
     roomCode: 'abcdefghijklmnopqrstuvwx',
     phase: 'lobby',
     version: 1,
@@ -158,6 +161,7 @@ describe('authoritative room rendering', () => {
     const { rerender } = renderRoom(projection());
     const notes = Array.from({ length: 12 }, (_, index) => ({
       participantId: `p-${String(index)}`,
+      avatarSlot: index,
       nickname: `Writer ${String(index + 1)}`,
       body: `Note ${String(index + 1)}`,
     }));

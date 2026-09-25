@@ -2,6 +2,7 @@ export type RoomPhase = 'lobby' | 'writing' | 'reveal';
 
 export interface Participant {
   id: string;
+  avatarSlot: number;
   nickname: string;
   sessionHash: string;
   joinedAt: number;
@@ -43,6 +44,7 @@ export interface SessionIdentity {
 
 export interface ParticipantSummary {
   id: string;
+  avatarSlot: number;
   nickname: string;
   connected: boolean;
   disconnectDeadline: number | null;
@@ -58,12 +60,14 @@ export interface PrivateNoteProjection {
 
 export interface RevealedNoteProjection {
   participantId: string;
+  avatarSlot: number;
   nickname: string;
   body: string;
 }
 
 export interface RoomProjection {
   roomId: string;
+  roundId: string | null;
   roomCode: string;
   phase: RoomPhase;
   version: number;

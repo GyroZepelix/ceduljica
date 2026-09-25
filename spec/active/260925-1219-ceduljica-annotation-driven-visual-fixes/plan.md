@@ -165,7 +165,7 @@ Review tier: medium. Scoped checks per slice; focused T01 review after 01.01; fo
 
 ## Execution handoff
 
-Start from [implementation/index.md](./implementation/index.md). Current is 02.01, not started. T01 passed scoped/common checks, focused independent review and user visual approval; see its packet for evidence and preserved infrastructure interruptions. Implementation/T01 starting checkpoint is `817997403e53bb230af8d86bce100cc687012aa4`; T02's starting checkpoint remains unrecorded until execution begins.
+Start from [implementation/index.md](./implementation/index.md). Current is 02.02, not started. T01 passed scoped/common checks, focused independent review and user visual approval; see its packet for evidence and preserved infrastructure interruptions. 02.01 passed scoped/common checks and focused disposable-browser verification; its packet records compatibility, motion, layout evidence and the preserved runtime-context discrepancy. T02 and final verification remain incomplete. Implementation/T01 starting checkpoint is `817997403e53bb230af8d86bce100cc687012aa4`; T02's starting checkpoint is `b06f913f219fb96ef96d883f6c7ad159240901f3`.
 
 ```text
 Use twin-astra as the implementation agent.

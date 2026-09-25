@@ -4,7 +4,7 @@ Plan: `../plan.md`
 Mode: sliced
 Assurance: medium - live phase transitions, responsive accessibility, and persistent avatar identity have meaningful regression cost within a recoverable local deployment.
 Review tier: scoped checks per slice, focused review at coherent segment boundaries, and one independent final contract-quality review.
-Current: `02.01`
+Current: `02.02`
 Expected implementation sessions: 3
 Implementation starting checkpoint: `817997403e53bb230af8d86bce100cc687012aa4` (01.01 execution start; planning artifacts pre-existed unstaged)
 
@@ -60,11 +60,11 @@ Boundary 01.01 -> 02.01: five generated illustrations require external generatio
 ### T02: Deliver and prove the note-first room experience
 
 Depends on: T01
-Segment starting checkpoint: unrecorded
+Segment starting checkpoint: `b06f913f219fb96ef96d883f6c7ad159240901f3` (02.01 clean execution start)
 Segment acceptance: note-first rooms, stable distinct avatars, non-blocking flights, and centered reveal satisfy every annotation and preserve existing room data and behavior across browsers and Compose restart.
 Segment gate: common checks, integrated browser/Compose acceptance, final user visual approval, one focused T02 review, and one independent whole-contract review.
 
-- [ ] 02.01: Integrate avatar identity and note-first rooms (packet: `./02-01-avatar-note-first-rooms.md`)
+- [x] 02.01: Integrate avatar identity and note-first rooms (packet: `./02-01-avatar-note-first-rooms.md`)
 
 Boundary 02.01 -> 02.02: multi-context transition interruption, the full viewport/zoom visual matrix, and packaged restart/asset checks require the integrated room experience. Isolating this costly browser/Compose diagnosis avoids mixing persistence/animation implementation with full-system reproduction and visual correction.
 
@@ -72,4 +72,4 @@ Boundary 02.01 -> 02.02: multi-context transition interruption, the full viewpor
 
 ## Discoveries and blockers
 
-T01 passed scoped/common checks, actual human visual approval and the focused independent review by regular twin `gm-260925-1219-01-01-review-b8e2` (PASS, no findings, zero corrective reruns). Three earlier provider infrastructure failures are preserved in the 01.01 packet; they did not produce verdicts. Current advances to 02.01, not started. Native 200% browser zoom remains part of final integrated verification in 02.02. No open T01 blocker.
+T01 passed scoped/common checks, actual human visual approval and the focused independent review by regular twin `gm-260925-1219-01-01-review-b8e2` (PASS, no findings, zero corrective reruns). Three earlier provider infrastructure failures are preserved in the 01.01 packet; they did not produce verdicts. 02.01 subsequently passed scoped/common checks and focused isolated browser verification; see its packet for exact paths, compatibility evidence, corrected check failures, screenshots and the stale 33000 runtime-context discrepancy (existing healthy app observed on 3000 and preserved). Current advances once to 02.02, not started. Native 200% zoom, full browser/Compose acceptance, final human visual approval and the focused T02/independent final reviews remain for 02.02. T02 is not complete; no open 02.01 blocker.

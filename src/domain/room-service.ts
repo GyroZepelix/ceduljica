@@ -8,6 +8,7 @@ import {
   ROOM_TTL_MS,
 } from '../shared/constants.js';
 import { RoomError } from './errors.js';
+import { availableAvatarSlot, normalizeAvatarSlots } from './avatar-slots.js';
 import { parseDraft, parseNickname, parseParticipantId } from './validation.js';
 import type {
   Credentials,
@@ -46,6 +47,7 @@ export class RoomService {
     const participantId = this.identities.id();
     const participant: Participant = {
       id: participantId,
+      avatarSlot: 0,
       nickname,
       sessionHash: hashToken(token),
       joinedAt: now,
@@ -81,6 +83,7 @@ export class RoomService {
     const token = this.identities.secret();
     const participant: Participant = {
       id: this.identities.id(),
+      avatarSlot: availableAvatarSlot(room.participants),
       nickname,
       sessionHash: hashToken(token),
       joinedAt: this.clock.now(),
@@ -222,9 +225,12 @@ export class RoomService {
       if (room.expiresAt <= now) {
         this.store.delete(room.id);
         expiredRoomIds.push(room.id);
-      } else if (this.applyDeadlines(room, now)) {
-        this.store.save(room);
-        changedRoomIds.push(room.id);
+      } else {
+        this.normalizePresentation(room);
+        if (this.applyDeadlines(room, now)) {
+          this.store.save(room);
+          changedRoomIds.push(room.id);
+        }
       }
     }
     return { expiredRoomIds, changedRoomIds };
@@ -238,6 +244,7 @@ export class RoomService {
         this.store.delete(room.id);
         continue;
       }
+      this.normalizePresentation(room);
       let changed = this.applyDeadlines(room, now);
       for (const participant of room.participants) {
         if (participant.connected) {
@@ -292,6 +299,7 @@ export class RoomService {
       if (room) this.store.delete(room.id);
       throw new RoomError('room_not_found', 'Room not found.');
     }
+    this.normalizePresentation(room);
     const participant = room.participants.find((candidate) => candidate.id === identity.participantId);
     if (!participant) throw new RoomError('session_not_found', 'Session not found.');
     return { room, participant };
@@ -306,7 +314,12 @@ export class RoomService {
       if (room) this.store.delete(room.id);
       throw new RoomError('room_not_found', 'Room not found.');
     }
+    this.normalizePresentation(room);
     return room;
+  }
+
+  private normalizePresentation(room: Room): void {
+    if (normalizeAvatarSlots(room)) this.store.save(room);
   }
 
   private commit(room: Room, meaningful: boolean): void {
@@ -424,6 +437,7 @@ function projectRoom(room: Room, participantId: string): RoomProjection {
   const connectedCount = room.participants.filter((participant) => participant.connected).length;
   const projection: RoomProjection = {
     roomId: room.id,
+    roundId: room.round?.id ?? null,
     roomCode: room.code,
     phase: room.phase,
     version: room.version,
@@ -438,6 +452,7 @@ function projectRoom(room: Room, participantId: string): RoomProjection {
       .sort((left, right) => left.joinedOrder - right.joinedOrder)
       .map((participant) => ({
         id: participant.id,
+        avatarSlot: participant.avatarSlot,
         nickname: participant.nickname,
         connected: participant.connected,
         disconnectDeadline: participant.disconnectDeadline,
@@ -466,7 +481,7 @@ function projectRoom(room: Room, participantId: string): RoomProjection {
       const participant = room.participants.find((candidate) => candidate.id === activeId);
       const note = room.round?.notes[activeId];
       return participant && note
-        ? [{ participantId: activeId, nickname: participant.nickname, body: note.body }]
+        ? [{ participantId: activeId, avatarSlot: participant.avatarSlot, nickname: participant.nickname, body: note.body }]
         : [];
     });
   }

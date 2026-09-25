@@ -141,30 +141,41 @@ textarea { resize: vertical; min-height: 210px; line-height: 1.55; font-size: 1.
 .error-summary { width: min(780px, calc(100% - 32px)); margin: 16px auto; padding: 14px 16px; border: 3px solid var(--danger); border-radius: 16px; background: var(--coral-soft); font-weight: 800; position: relative; z-index: 4; }
 
 .room-main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; padding: 48px 0 72px; }
-.phase-card { min-width: 0; padding: clamp(22px, 4vw, 44px); position: relative; overflow: hidden; }
+.phase-card { min-width: 0; padding: clamp(22px, 4vw, 44px); position: relative; z-index: 1; overflow: hidden; }
+.room-reveal { grid-template-columns: minmax(0, 1fr); }
+.open-phase { padding: 0; overflow: visible; }
+.room-writing .open-phase { width: min(100%, 680px); margin-inline: auto; }
+.room-reveal .open-phase > .eyebrow, .room-reveal h1, .room-reveal .lede { text-align: center; }
+.room-writing .privacy-note { border: 0; background: transparent; padding: 0; color: var(--muted); }
+.composer-note { margin: 24px 0; padding: 24px; background: var(--yellow); border: 3px solid var(--ink); position: relative; clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 0 100%); }
+.composer-note label, .note-label { margin: 0 24px 12px 0; font-weight: 800; }
+.composer-note textarea { background: transparent; border: 2px solid rgba(36,21,74,.35); border-radius: 6px; padding: 12px; min-height: 260px; }
+.composer-note .counter { margin: 12px 0 0; }
+.note-flight { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.flight-paper { position: absolute; top: 155px; left: max(16px, calc((100% - 324px - 430px) / 2)); width: min(430px, calc(100% - 32px)); height: 290px; background: var(--yellow); border: 3px solid var(--ink); clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 0 100%); }
+.note-flight-in .flight-paper { animation: note-fly-in 480ms ease-out both; }
+.note-flight-out .flight-paper { animation: note-fly-out 480ms ease-in both; }
 .people-card { padding: 22px; }
 .people-card h2 { font-size: 1.2rem; }
 .invite-box, .info-panel, .privacy-note { padding: 16px; border: 3px solid var(--ink); border-radius: 16px; background: var(--sky-soft); }
 .inline-control { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
 .owner-controls { margin-top: 28px; padding-top: 22px; border-top: 3px dashed var(--ink); }
 .owner-controls .button { margin-right: 12px; margin-bottom: 12px; }
-.owner-notice { display: inline-block; background: var(--sky-soft); border: 2px solid var(--ink); border-radius: 12px; padding: 4px 10px; font-weight: 800; }
+.owner-stamp { display: inline-block; flex: 0 0 auto; margin: 0; background: #fff1ca; color: var(--ink); border: 3px double var(--ink); border-radius: 4px; padding: 3px 7px; font-size: .78rem; font-weight: 900; letter-spacing: .04em; line-height: 1.5; }
 .waiting-copy { padding: 16px; background: var(--yellow); border: 3px solid var(--ink); border-radius: 16px; font-weight: 800; }
 .privacy-note { background: var(--sky-soft); }
 .counter { text-align: right; color: var(--muted); font-weight: 800; }
 .ready-button { min-width: 180px; }
 .ready-heading span { display: inline-grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--ink); background: var(--mint); animation: ready-stamp 220ms ease-out; }
-.own-note-preview { margin: 22px 0; padding: 24px; min-height: 140px; border: 3px solid var(--ink); border-radius: 10px; background: var(--yellow); font-size: 1.1rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.own-note-preview { margin: 0; min-height: 260px; font-size: 1.1rem; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .people-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.person-row { display: flex; align-items: center; gap: 9px; min-width: 0; padding-bottom: 12px; border-bottom: 2px solid #e5dfd0; }
-.avatar { flex: 0 0 30px; width: 30px; height: 30px; border: 3px solid var(--ink); background: var(--sky); border-radius: 50%; }
-.avatar-1 { border-radius: 7px; background: var(--yellow); transform: rotate(-4deg); }
-.avatar-2 { background: var(--mint); clip-path: polygon(50% 0, 100% 100%, 0 100%); border-radius: 0; }
-.avatar-3 { border-radius: 9px; background: var(--lavender); }
+.person-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; padding-bottom: 12px; border-bottom: 2px solid #e5dfd0; }
+.avatar { display: block; flex: 0 0 42px; width: 42px; height: 42px; }
+.person-row .remove-button { margin-left: auto; }
+.person-row .person-copy { flex-basis: 100px; }
 .person-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; font-size: .84rem; }
 .person-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.status-chip { font-size: .72rem; padding: 3px 5px; background: var(--sky-soft); border: 2px solid var(--ink); border-radius: 10px; }
 .remove-button { min-height: 44px; min-width: 44px; border: 0; background: transparent; color: var(--danger); text-decoration: underline; cursor: pointer; }
 .disconnect-help { margin-top: 16px; padding: 12px; border: 2px solid var(--danger); border-radius: 12px; background: var(--coral-soft); font-size: .86rem; }
 .people-disclosure { display: none; }
@@ -177,9 +188,10 @@ textarea { resize: vertical; min-height: 210px; line-height: 1.55; font-size: 1.
 .sticky-note { min-height: 190px; padding: 30px 20px 14px; border: 3px solid var(--ink); border-radius: 0; clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 0 100%); display: flex; flex-direction: column; position: relative; animation: card-in 360ms ease-out both; }
 .sticky-note:nth-child(odd) { transform: rotate(-.7deg); }
 .sticky-note:nth-child(even) { transform: rotate(.7deg); }
-.sticky-note::after { content: ""; position: absolute; top: -3px; right: -3px; width: 29px; height: 29px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath d='M1.5 1.5V27.5H27.5Z' fill='%23ffeb96' stroke='%2324154a' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat; pointer-events: none; }
+.sticky-note::after, .composer-note::after, .flight-paper::after { content: ""; position: absolute; top: -3px; right: -3px; width: 29px; height: 29px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath d='M1.5 1.5V27.5H27.5Z' fill='%23ffeb96' stroke='%2324154a' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat; pointer-events: none; }
 .sticky-note p { flex: 1; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 1.08rem; line-height: 1.5; }
-.sticky-note footer { border-top: 2px solid rgba(36,21,74,.28); padding-top: 9px; font-weight: 900; }
+.sticky-note footer { display: flex; align-items: center; gap: 8px; border-top: 2px solid rgba(36,21,74,.28); padding-top: 9px; font-weight: 900; }
+.sticky-note footer span { min-width: 0; }
 .note-color-0 { background: var(--yellow); } .note-color-1 { background: var(--mint); } .note-color-2 { background: var(--sky-soft); } .note-color-3 { background: var(--coral-soft); } .note-color-4 { background: var(--lavender); }
 .reveal-burst { position: absolute; width: 120px; height: 120px; right: 5%; top: 20px; background: var(--coral); opacity: .16; clip-path: polygon(50% 0,59% 35%,85% 15%,66% 42%,100% 50%,66% 58%,85% 85%,59% 65%,50% 100%,41% 65%,15% 85%,34% 58%,0 50%,34% 42%,15% 15%,41% 35%); }
 .mobile-note-progress { display: none; }
@@ -206,6 +218,8 @@ textarea { resize: vertical; min-height: 210px; line-height: 1.55; font-size: 1.
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
 @keyframes plaza-drift { to { background-position: 112px 0; } }
+@keyframes note-fly-in { from { transform: translateY(-520px) rotate(-12deg); opacity: 0; } 30% { opacity: 1; } to { transform: translateY(0); opacity: 0; } }
+@keyframes note-fly-out { from { transform: translateY(0); opacity: .9; } to { transform: translateY(-520px) rotate(14deg); opacity: 0; } }
 @keyframes card-in { from { opacity: 0; translate: 0 14px; } }
 @keyframes ready-stamp { 50% { transform: scale(1.07); } 72% { transform: scale(.98); } }
 @keyframes modal-in { from { opacity: 0; transform: scale(.96); } }
@@ -230,6 +244,7 @@ textarea { resize: vertical; min-height: 210px; line-height: 1.55; font-size: 1.
   .entry-grid { grid-template-columns: 1fr; gap: 20px; }
   .entry-card, .create-card, .join-card { transform: none; padding: 22px; }
   .room-main { grid-template-columns: 1fr; padding-top: 38px; }
+  .flight-paper { left: 16px; }
   .people-card { display: none; }
   .people-disclosure { display: block; width: min(100% - 32px, 1180px); margin: -48px auto 64px; padding: 16px; position: relative; z-index: 2; }
   .people-disclosure summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 900; }
@@ -247,6 +262,8 @@ textarea { resize: vertical; min-height: 210px; line-height: 1.55; font-size: 1.
   .phase-tab { margin-left: 0; }
   .landing-main, .room-main { width: calc(100% - 24px); }
   .phase-card { padding: 20px 16px; }
+  .open-phase { padding: 0; }
+  .composer-note { padding: 22px 16px 16px; }
   .card-number { font-size: 1.5rem; }
   .secondary-pal { display: none; }
 }
@@ -258,6 +275,7 @@ textarea { resize: vertical; min-height: 210px; line-height: 1.55; font-size: 1.
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .note-flight { display: none; }
   .note-motif { animation: none; }
   .sticky-note { transform: none !important; }
 }

@@ -42,3 +42,11 @@ Use this shape for new entries:
 - Wiki pages changed: `wiki/architecture/room-core.md` and this maintenance log.
 - Verification: clean Node checks and browser E2E passed; Compose built the Node 26 image, reached health, passed native SQLite restart/persistence/privacy/deletion smoke, stopped without `-v`, and retained the named data volume.
 - Notes: the architecture remains intentionally single-process; production HTTPS and WebSocket forwarding are operator responsibilities.
+
+## [2026-09-25] dream | stable avatars and round-aware presentation
+
+- Trigger: authorized Dream after Gamemaster checkpoint `260925-1219-ceduljica-annotation-driven-visual-fixes/02.01`.
+- Inputs: tested 02.01 working tree after `b06f913f219fb96ef96d883f6c7ad159240901f3`; `src/domain/avatar-slots.ts`, `src/domain/room-service.ts`, `src/domain/types.ts`, `src/client/RoomScreen.tsx`, `src/client/NoteFlight.tsx`, focused avatar/compatibility/transition tests, and the completed 02.01 packet.
+- Wiki pages changed: `wiki/architecture/room-core.md`, this log, `wiki/dreams/2026-09-25-1554-gamemaster-checkpoint-260925-1219-ceduljica-annotation-driven-visual-fixes-02-01.md`, `wiki/dreams/episodes.jsonl`, and `wiki/dreams/by-spec/260925-1219-ceduljica-annotation-driven-visual-fixes.md`.
+- Verification: source-supported guidance and its exact ledger review blocks checked; memory safety, catalog/frontmatter identity, relative links, append-only history and non-wiki/index preservation checks performed.
+- Notes: final visual/Compose acceptance, native 200% zoom and scheduled reviews remain pending in 02.02. Runtime-port observations and harness failures stay episodic. No observations, new dynamic pages, pointer/index routes, or ingest/checkpoint state were added.

@@ -8,7 +8,10 @@ fi
 
 PORT="${CEDULJICA_E2E_PORT:-43123}"
 BASE_URL="http://127.0.0.1:${PORT}"
-SESSION="ceduljica-e2e"
+SESSION="${CEDULJICA_E2E_SESSION:-ceduljica-e2e}"
+SCRIPT="${CEDULJICA_E2E_SCRIPT:-tests/e2e/browser-contract.js}"
+# Refuse an occupied port rather than accidentally testing an unrelated runtime.
+node --input-type=module -e "import net from 'node:net'; const server = net.createServer(); server.on('error', error => { console.error(error.message); process.exit(1); }); server.listen(${PORT}, '127.0.0.1', () => server.close());"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ceduljica-e2e.XXXXXX")"
 SERVER_PID=""
 
@@ -38,4 +41,4 @@ until node -e "fetch('${BASE_URL}/health').then(r=>{if(!r.ok)process.exit(1)}).c
 done
 
 playwright-cli -s="$SESSION" open "$BASE_URL" >/dev/null
-playwright-cli -s="$SESSION" run-code --filename=tests/e2e/browser-contract.js
+playwright-cli -s="$SESSION" run-code --filename="$SCRIPT"

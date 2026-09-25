@@ -32,7 +32,7 @@ Binding translation from the selected target:
 
 - Build a sunny open-air plaza around the interface: warm paving, coral architecture shapes, sky openings, organic green edge forms, loose bunting, and floating paper accents. These stay abstract and original rather than becoming a literal scenic illustration on every screen.
 - Keep Peel/Dot/Zip/Loop at the perimeter, never behind user copy or over controls. Use one or two pals per key view, with deep-purple outlines, rosy cheek accents, tiny limbs, elastic poses, and one readable expression.
-- Supporting panels use warm opaque tints. The follow-up room target is a standalone writable yellow sticky note rather than a large enclosing white card; full room restructuring follows the shared foundation. The input itself stays level and texture-free.
+- Supporting panels use warm opaque tints. Writing and the frozen ready preview use a standalone yellow sticky note on the canvas, not an enclosing white card. The level, multiline textarea shares the yellow surface; its quiet inset outline and visible focus ring identify the editable region.
 - Use one subtle repeated sticky-note outline as warm paved atmosphere, restrained recognizable arch/plant scenery at wide-screen edges, and the integrated multicolor header ribbon as the energetic accent. Preserve generous sky/canvas gaps so the scene breathes.
 - Decorative backdrops may use very soft tonal depth; controls, cards, notes, forms, and dialogs use deterministic flat fills and sharp contrast.
 
@@ -127,9 +127,9 @@ Labels stay above controls. Help and error text reserve space below. Invalid sta
 
 ### Participant rows and ownership
 
-The follow-up target is 12 stable automatically assigned character/color variants, shared by participant rows and revealed authors. This is pending room integration; the existing four-shape mapping is not a binding target. Every person row retains a name and textual status:
+Twelve server-assigned character/color variants use the four original Peel/Dot/Zip/Loop silhouettes in three palettes, with small expression variations. `src/client/Avatar.tsx` is an original vector redraw, not generated or uploaded artwork. Each retained participant reserves its room-local slot across reload, reconnect, restart and replay, including disconnected ready authors. Only actual membership removal frees a slot. Participant rows and revealed author footers render the same assigned variant; names remain the accessible identity. Every person row retains a name and textual status:
 
-- Owner: explicit `Owner` text; the follow-up Owner stamp is pending room integration.
+- Owner: a legible double-outline stamp with explicit `Owner` text, repeated by revealed owner controls.
 - Writing: pencil icon and `Writing`.
 - Ready: check icon and `Ready`.
 - Waiting: hourglass icon and `Next round`.
@@ -150,7 +150,7 @@ Icons and color supplement, rather than replace, these labels. Owner-only contro
 
 Reveal notes use yellow, mint, sky-soft, coral-soft, and lavender in a deterministic repeating sequence, always with ink text and the writer name in a footer. Color has no semantic meaning. The surrounding board may be exuberant, but user-written note surfaces never use burst patterns behind text.
 
-- 1 note: centered, maximum 520 x 420 px.
+- 1 note: centered, maximum 520 px wide; height expands without a maximum.
 - 2–4 notes: 2-column desktop; single column mobile.
 - 5–8 notes: 3-column desktop; single column mobile.
 - 9–12 notes: 4-column desktop with compact 16 px gaps; single column mobile, with a sticky progress label (`12 notes · note 1 of 12`) and normal page scrolling.
@@ -192,9 +192,12 @@ Motion is punchy, quick, and interruptible: one snap, stamp, or settle per actio
 | Button press | 90 ms down/return, 2 px translation. | Instant fill change. |
 | Card entry | 160 ms snap from 10 px rise and 1° tilt, 25 ms stagger, max 6 items staggered. | Instant appearance with zero tilt or stagger. |
 | Ready | 220 ms scale `1 → 1.07 → .98 → 1`; check stamps in once. | Instant check and text update. |
-| Reveal | 360 ms burst flash and board fade; notes snap from 14 px, max 440 ms total. | Instant board switch; heading focus communicates phase. |
+| New writing round | A blank decorative yellow note flies down once in 480 ms. The actual editor and controls are immediately available. | Instant editor, no flight overlay. |
+| Reveal | Authoritative board and heading focus switch immediately; a blank decorative note flies out in 480 ms while board cards enter in 360 ms. | Instant board switch; heading focus communicates phase. |
 | Modal | 150 ms fade/scale from 96% with one overshoot. | Instant open/close. |
 | Disconnect countdown | No pulsing. Numeral updates once per second. | Same static numeral update. |
+
+Flights are keyed to the existing opaque round ID, never room version. Initial restoration, same-round reconnect, Ready/Edit, snapshot churn and rejection do not replay effects. Late joiners have no personal note to fly out. Blank flights are aria-hidden, pointer-transparent and behind content; they never retain draft text or interactive editors. A 520 ms fallback removes them without animation events, and a new round, room change, disconnect, reduced-motion preference or unmount interrupts them. A reconnect that missed reveal resets the editor using the new round identity.
 
 Use `prefers-reduced-motion: reduce` to freeze the canvas motif and remove transforms, parallax, confetti movement, auto-scrolling, and stagger. Preserve a visible focus move or polite status announcement so the state transition remains understandable.
 
@@ -223,7 +226,7 @@ No sound plays before a user gesture. Default is on after gesture, subject to br
 ## Responsive handoff
 
 - Breakpoints are content-driven: one-column entry and participant layouts below 720 px; two-column room layout from 720 px; reveal grid changes at approximately 720, 960, and 1180 px.
-- Lobby/writing currently retain a main region and 300 px participant rail; standalone note restructuring follows in room integration. Reveal's approved follow-up target is an open board centered in the complete available width, with no empty participant track. Mobile keeps phase progress above the editor and participants in a collapsible `People (4)` disclosure after the primary action.
+- Lobby/writing retain a main region and 300 px participant rail. Writing has no outer enclosing panel. Reveal uses one complete-width track and an open, centered board; it reserves no empty participant column. Mobile keeps phase progress above the editor and participants in a collapsible `People (4)` disclosure after the primary action.
 - Dialogs fit within `min(680px, viewport - 32px)` and scroll internally only when viewport height requires it.
 - Respect safe-area insets on mobile. Nothing essential is fixed to the viewport except optional status banners, which must not cover controls.
 - Do not reorder controls with CSS in a way that diverges from DOM and keyboard order.

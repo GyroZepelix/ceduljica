@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { ParticipantSummary, RoomProjection } from '../domain/types.js';
 import { NoteMark, PlazaBackdrop } from './Artwork.js';
+import { Avatar } from './Avatar.js';
+import { NoteFlight } from './NoteFlight.js';
 import { HowTo } from './HowTo.js';
 import { Modal } from './Modal.js';
 import type { RoomCommand } from './types.js';
@@ -25,15 +27,16 @@ export function RoomScreen(props: RoomScreenProps): ReactNode {
   const [busy, setBusy] = useState(false);
   const [transferMessage, setTransferMessage] = useState('');
   const phaseHeading = useRef<HTMLHeadingElement>(null);
-  const previousPhase = useRef(room.phase);
+  const previousPhase = useRef(`${room.roomId}:${room.roundId}:${room.phase}`);
   const previousOwner = useRef(ownerName(room));
 
   useEffect(() => {
-    if (previousPhase.current !== room.phase) {
-      previousPhase.current = room.phase;
+    const phaseKey = `${room.roomId}:${room.roundId}:${room.phase}`;
+    if (previousPhase.current !== phaseKey) {
+      previousPhase.current = phaseKey;
       phaseHeading.current?.focus();
     }
-  }, [room.phase]);
+  }, [room.roomId, room.roundId, room.phase]);
 
   useEffect(() => {
     const next = ownerName(room);
@@ -75,8 +78,9 @@ export function RoomScreen(props: RoomScreenProps): ReactNode {
       <div aria-atomic="true" aria-live="polite" className="sr-only">{announcement} {transferMessage}</div>
       {transferMessage ? <div className="status-banner" role="status">{transferMessage}</div> : null}
       {error ? <div className="error-summary" role="alert">{error}</div> : null}
-      <main className="room-main">
-        <section className="phase-card paper-card">
+      <main className={`room-main room-${room.phase}`}>
+        <NoteFlight connection={connection} room={room} />
+        <section className={`phase-card ${room.phase === 'lobby' ? 'paper-card' : 'open-phase'}`}>
           <PhaseContent
             busy={busy || connection !== 'online'}
             headingRef={phaseHeading}
@@ -158,7 +162,7 @@ interface PhaseContentProps {
 
 function PhaseContent({ room, busy, headingRef, onAct, onDelete }: PhaseContentProps): ReactNode {
   if (room.phase === 'lobby') return <Lobby busy={busy} headingRef={headingRef} onAct={onAct} room={room} />;
-  if (room.phase === 'writing') return <Writing busy={busy} headingRef={headingRef} onAct={onAct} room={room} />;
+  if (room.phase === 'writing') return <Writing key={`${room.roomId}:${room.roundId}`} busy={busy} headingRef={headingRef} onAct={onAct} room={room} />;
   return <Reveal busy={busy} headingRef={headingRef} onAct={onAct} onDelete={onDelete} room={room} />;
 }
 
@@ -205,24 +209,43 @@ function Writing({ room, busy, headingRef, onAct }: Omit<PhaseContentProps, 'onD
   const own = room.ownNote;
   const [draft, setDraft] = useState(own?.body ?? '');
   const lastServerBody = useRef(own?.body ?? '');
+  const lastSentBody = useRef(own?.body ?? '');
+  const draftTimer = useRef<number | undefined>(undefined);
+  const submitting = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  const editor = useRef<HTMLTextAreaElement>(null);
+  const wasReady = useRef(own?.ready);
+
+  useEffect(() => {
+    if (wasReady.current && !own?.ready) editor.current?.focus();
+    wasReady.current = own?.ready;
+  }, [own?.ready]);
   const active = room.participants.filter((person) => person.roundRole === 'active');
   const readyCount = active.filter((person) => person.ready).length;
 
   useEffect(() => {
     const serverBody = room.ownNote?.body;
     if (serverBody !== undefined && serverBody !== lastServerBody.current) {
+      const previousBody = lastServerBody.current;
       lastServerBody.current = serverBody;
-      setDraft(serverBody);
+      if (lastSentBody.current === previousBody) lastSentBody.current = serverBody;
+      setDraft((current) => current === previousBody ? serverBody : current);
     }
   }, [room.ownNote?.body]);
 
   useEffect(() => {
-    if (!isActive || own?.ready || draft === lastServerBody.current) return;
-    const timer = window.setTimeout(() => {
-      void onAct({ type: 'save_draft', body: draft });
-      lastServerBody.current = draft;
+    if (!isActive || own?.ready || submitting.current || draft === lastServerBody.current || draft === lastSentBody.current) return;
+    draftTimer.current = window.setTimeout(() => {
+      lastSentBody.current = draft;
+      void onAct({ type: 'save_draft', body: draft }).then((saved) => {
+        if (!saved && lastSentBody.current === draft) lastSentBody.current = lastServerBody.current;
+      });
     }, 600);
-    return () => window.clearTimeout(timer);
+    return () => window.clearTimeout(draftTimer.current);
   }, [draft, isActive, onAct, own?.ready]);
 
   if (!isActive) {
@@ -243,7 +266,10 @@ function Writing({ room, busy, headingRef, onAct }: Omit<PhaseContentProps, 'onD
         <p className="eyebrow">Writing · {readyCount} of {active.length} ready</p>
         <h1 className="ready-heading" ref={headingRef} tabIndex={-1}><span aria-hidden="true">✓</span> You're ready</h1>
         <p>{remaining === 0 ? 'Reveal is starting.' : `Waiting for ${remaining} more. You can edit until reveal starts.`}</p>
-        <blockquote className="own-note-preview">{own.body}</blockquote>
+        <div className="composer-note">
+          <p className="note-label">Your note · ready</p>
+          <blockquote className="own-note-preview">{own.body}</blockquote>
+        </div>
         <button className="button secondary" disabled={busy} onClick={() => { void onAct({ type: 'edit' }); }} type="button">✎ Edit note</button>
       </>
     );
@@ -255,22 +281,32 @@ function Writing({ room, busy, headingRef, onAct }: Omit<PhaseContentProps, 'onD
       <p className="eyebrow">Writing · {readyCount} of {active.length} ready</p>
       <h1 ref={headingRef} tabIndex={-1}>Write one private note</h1>
       <p className="privacy-note"><span aria-hidden="true">◉</span> Only your note is sent back to you before reveal.</p>
-      <label htmlFor="note">Your note</label>
-      <textarea
-        id="note"
-        maxLength={500}
-        onChange={(event) => setDraft(event.target.value)}
-        rows={9}
-        value={draft}
-      />
-      <p className="counter">{countText}</p>
+      <div className="composer-note">
+        <label htmlFor="note">Your note</label>
+        <textarea
+          id="note"
+          ref={editor}
+          maxLength={500}
+          onChange={(event) => setDraft(event.target.value)}
+          rows={9}
+          value={draft}
+        />
+        <p className="counter">{countText}</p>
+      </div>
       <button
         className="button primary ready-button"
         disabled={busy || draft.trim().length === 0}
         onClick={() => {
+          if (submitting.current) return;
+          submitting.current = true;
+          window.clearTimeout(draftTimer.current);
           void (async () => {
-            if (await onAct({ type: 'save_draft', body: draft })) {
-              await onAct({ type: 'ready' }, 'ready');
+            try {
+              if (await onAct({ type: 'save_draft', body: draft }) && mounted.current) {
+                await onAct({ type: 'ready' }, 'ready');
+              }
+            } finally {
+              submitting.current = false;
             }
           })();
         }}
@@ -295,13 +331,13 @@ function Reveal({ room, busy, headingRef, onAct, onDelete }: PhaseContentProps):
         {notes.map((note, index) => (
           <li className={`sticky-note note-color-${String(index % 5)}`} key={note.participantId}>
             <p>{note.body}</p>
-            <footer>— {note.nickname}</footer>
+            <footer><Avatar slot={note.avatarSlot} /><span>{note.nickname}</span></footer>
           </li>
         ))}
       </ol>
       {room.self.isOwner ? (
         <div aria-label="Owner controls" className="owner-controls reveal-controls">
-          {room.self.isOwner ? <p className="owner-notice">You are the owner</p> : null}
+          <p className="owner-stamp">Owner</p>
           <button className="button primary" disabled={!room.canReplay || busy} onClick={() => { void onAct({ type: 'replay' }); }} type="button">Start a new round</button>
           {!room.canReplay ? <p className="supporting">A new round needs 2 connected people.</p> : null}
           <button className="button danger" disabled={busy} onClick={onDelete} type="button">⌫ Delete room</button>
@@ -356,12 +392,12 @@ function ParticipantRow({ room, person, onAct }: { room: RoomProjection; person:
   const canRemove = room.self.isOwner && person.id !== room.self.participantId && room.phase !== 'reveal';
   return (
     <li className="person-row">
-      <span aria-hidden="true" className={`avatar avatar-${String(person.id.charCodeAt(0) % 4)}`} />
+      <Avatar slot={person.avatarSlot} />
       <span className="person-copy">
         <strong>{person.nickname}{person.id === room.self.participantId ? ' (you)' : ''}</strong>
         <span>{status}</span>
       </span>
-      {person.isOwner ? <span className="status-chip">⚿ Owner</span> : null}
+      {person.isOwner ? <span className="owner-stamp">Owner</span> : null}
       {canRemove && onAct ? (
         <button aria-label={`Remove ${person.nickname}`} className="remove-button" onClick={() => { void onAct({ type: 'remove', participantId: person.id }); }} type="button">Remove</button>
       ) : null}
