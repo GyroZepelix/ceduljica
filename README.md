@@ -58,6 +58,58 @@ docker compose down --volumes
 
 This is destructive and cannot be undone without a backup. For one room, prefer the owner's **Delete room** control.
 
+## Production deployment
+
+Production on `himmel` uses `compose.yaml` together with `compose.production.yaml`. The override removes the local-development host port and joins the existing external `reverse-proxy` network as `ceduljica`; the base file continues to provide the health check, restart policy, single app process, and `ceduljica-data` volume.
+
+Bootstrap the public checkout as `rocky`, but do not start the base Compose topology by itself:
+
+```sh
+git clone https://github.com/GyroZepelix/ceduljica.git /opt/services/fun-postit
+cd /opt/services/fun-postit
+install -m 600 .env.production.example .env
+```
+
+The server-local `.env` is non-secret and must contain only this production selection:
+
+```dotenv
+COMPOSE_FILE=compose.yaml:compose.production.yaml
+```
+
+Configure these GitHub repository Actions secrets:
+
+| Name | Purpose |
+| --- | --- |
+| `DEPLOY_SSH_PRIVATE_KEY` | Dedicated private key whose matching public key alone is authorized for `rocky`. |
+| `DEPLOY_SSH_HOST` | Real public SSH endpoint; never the Cloudflare-proxied application hostname. |
+| `DEPLOY_SSH_PORT` | Public SSH port. |
+| `DEPLOY_SSH_USER` | Exact value `rocky`. |
+| `DEPLOY_SSH_KNOWN_HOSTS` | Independently verified known-hosts line for the endpoint and port. |
+
+Store all five values as repository secrets so GitHub masks them in Actions logs. Do not derive the pinned host value inside the workflow, reuse another private key, or enable SSH agent forwarding. The workflow writes the dedicated key and known-hosts material to temporary mode-0600 files, requires strict host-key checking, and removes those files when the job exits.
+
+A push to `master` or a manual **Deploy production** run enters the same non-cancelling production concurrency group. The job uses plain OpenSSH, verifies `himmel`, the exact checkout path, branch, origin, clean status, and `.env`, then runs:
+
+```sh
+git pull --ff-only origin master
+docker compose config --quiet
+docker compose up -d --build
+```
+
+Deployment fails if the fast-forwarded checkout does not equal the triggering full GitHub SHA or if the single container does not become healthy within the bounded wait. It never resets or cleans the checkout and never removes the volume.
+
+The separately managed Caddy route is intentionally only:
+
+```caddyfile
+ceduljica.dgjalic.com {
+	reverse_proxy ceduljica:3000
+}
+```
+
+Apply or change that shared-ingress route only through its validated, rollback-protected operator procedure. Production acceptance must confirm trusted HTTPS, `/health`, WebSocket create/join behavior, the `reverse-proxy` alias, the named `/data` volume, and the absence of both a published container port and a host listener on TCP 3000.
+
+Record the previous and deployed Git SHAs for each activation. Rebuilding a previous SHA is a manual, approved rollback only while its database expectations remain compatible. This release uses idempotent schema version 1; before deploying any future schema migration, establish a separate backup and rollback decision. Never use `docker compose down --volumes` in deployment or rollback.
+
 ## Configuration
 
 | Variable | Default | Purpose |

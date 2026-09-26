@@ -1,0 +1,103 @@
+name: Deploy production
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ceduljica-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to himmel
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Pull, build, and verify exact revision
+        shell: bash
+        env:
+          DEPLOY_SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+          DEPLOY_SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
+          DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$DEPLOY_SSH_HOST" =~ ^[A-Za-z0-9.-]+$ ]]
+          [[ "$DEPLOY_SSH_PORT" =~ ^[0-9]{1,5}$ ]]
+          (( DEPLOY_SSH_PORT >= 1 && DEPLOY_SSH_PORT <= 65535 ))
+          [[ "$DEPLOY_SSH_USER" == "rocky" ]]
+          [[ -n "$DEPLOY_SSH_KNOWN_HOSTS" ]]
+          [[ -n "$DEPLOY_SSH_PRIVATE_KEY" ]]
+
+          ssh_dir="$(mktemp -d)"
+          trap 'rm -rf "$ssh_dir"' EXIT
+          chmod 700 "$ssh_dir"
+          printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" >"$ssh_dir/id_ed25519"
+          printf '%s\n' "$DEPLOY_SSH_KNOWN_HOSTS" >"$ssh_dir/known_hosts"
+          chmod 600 "$ssh_dir/id_ed25519" "$ssh_dir/known_hosts"
+
+          ssh \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o ForwardAgent=no \
+            -o IdentitiesOnly=yes \
+            -o IdentityAgent=none \
+            -o StrictHostKeyChecking=yes \
+            -o "UserKnownHostsFile=$ssh_dir/known_hosts" \
+            -o GlobalKnownHostsFile=/dev/null \
+            -i "$ssh_dir/id_ed25519" \
+            -p "$DEPLOY_SSH_PORT" \
+            "$DEPLOY_SSH_USER@$DEPLOY_SSH_HOST" \
+            bash -s -- "$GITHUB_SHA" <<'REMOTE'
+          set -euo pipefail
+
+          expected_sha="$1"
+          repo=/opt/services/fun-postit
+
+          [[ "$expected_sha" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$(hostname)" == "himmel" ]]
+          [[ -d "$repo/.git" ]]
+          cd "$repo"
+          [[ "$(pwd -P)" == "$repo" ]]
+          [[ "$(git rev-parse --show-toplevel)" == "$repo" ]]
+          [[ "$(git symbolic-ref --short HEAD)" == "master" ]]
+          [[ "$(git remote get-url origin)" == "https://github.com/GyroZepelix/ceduljica.git" ]]
+          [[ -z "$(git status --porcelain=v1 --untracked-files=all)" ]]
+          [[ -f .env && ! -L .env ]]
+          [[ "$(stat -c '%U:%a' .env)" == "rocky:600" ]]
+          awk '
+            /^[[:space:]]*($|#)/ { next }
+            $0 == "COMPOSE_FILE=compose.yaml:compose.production.yaml" { compose_file_count++; next }
+            { invalid=1 }
+            END { exit !(invalid == 0 && compose_file_count == 1) }
+          ' .env
+
+          git pull --ff-only origin master
+          [[ "$(git rev-parse HEAD)" == "$expected_sha" ]]
+          docker compose config --quiet
+          docker compose up -d --build
+
+          container_id="$(docker compose ps -q app)"
+          [[ -n "$container_id" && "$container_id" != *$'\n'* ]]
+
+          for _ in $(seq 1 36); do
+            health="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}}' "$container_id")"
+            if [[ "$health" == "healthy" ]]; then
+              exit 0
+            fi
+            sleep 5
+          done
+
+          docker compose ps
+          printf 'Ceduljica did not become healthy within 180 seconds.\n' >&2
+          exit 1
+          REMOTE
