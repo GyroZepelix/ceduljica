@@ -8,7 +8,7 @@ import type { RoomCommand } from '../../src/client/types.js';
 
 function room(overrides: Partial<RoomProjection> = {}): RoomProjection {
   return {
-    roomId: 'room', roomCode: 'abcdefghijklmnopqrstuvwx', roundId: 'round-1', phase: 'writing', version: 2,
+    roomId: 'room', roomCode: 'abcdefghijklmnopqrstuvwx', roundId: 'round-1', roundPrompt: '', phase: 'writing', version: 2,
     self: { participantId: 'p0', nickname: 'Owner', isOwner: true, roundRole: 'active' },
     participants: Array.from({ length: 12 }, (_, index) => ({
       id: `p${index}`, avatarSlot: index, nickname: `Person ${index}`, connected: true,
@@ -71,7 +71,7 @@ describe('round-aware, inert note flights', () => {
     const { update, unmount } = view(room());
     update(revealed());
     expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Notes up!' }));
-    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.queryByRole('textbox', { name: 'Your note' })).toBeNull();
     expect(document.body.textContent).not.toContain('private draft');
     expect(flight()?.getAttribute('aria-hidden')).toBe('true');
     expect(flight()?.textContent).toBe('');
@@ -187,7 +187,7 @@ describe('note-first presentation and assigned characters', () => {
     expect([...document.querySelectorAll('.people-card .avatar')].map((svg) => Number(svg.getAttribute('data-avatar-slot')))).toEqual(Array.from({ length: 12 }, (_, index) => index));
     update(room({ ownNote: { body: 'frozen\nbody', ready: true } }));
     expect(screen.getByText('frozen body').closest('.composer-note')).not.toBeNull();
-    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.queryByRole('textbox', { name: 'Your note' })).toBeNull();
     update(revealed());
     expect(document.querySelector('.room-main')?.className).toContain('room-reveal');
     expect([...document.querySelectorAll('.note-board footer .avatar')].map((svg) => Number(svg.getAttribute('data-avatar-slot')))).toEqual(Array.from({ length: 12 }, (_, index) => index));

@@ -205,6 +205,11 @@ async (page) => {
   await guestPage.getByRole('heading', { name: 'Bring your people in' }).waitFor();
   await page.getByText('2 of 12 people').waitFor();
   assert(await page.getByRole('button', { name: 'Begin writing' }).isEnabled(), 'Owner could not begin with two participants.');
+  const firstRoundPrompt = 'What made you smile today?';
+  const promptInput = page.getByLabel('Round prompt (optional)');
+  assert(await promptInput.getAttribute('maxlength') === '200', 'Round prompt input did not expose the 200-character limit.');
+  await promptInput.fill(`  ${firstRoundPrompt}  `);
+  assert(await guestPage.getByRole('region', { name: 'Round prompt' }).count() === 0, 'Owner draft prompt leaked before the round began.');
   await noHorizontalOverflow(page, 'desktop lobby');
   await noHorizontalOverflow(guestPage, 'phone lobby');
   const initialIdentity = await identity(page);
@@ -217,6 +222,10 @@ async (page) => {
   await page.getByRole('button', { name: 'Begin writing' }).click();
   await page.getByRole('heading', { name: 'Write one private note' }).waitFor();
   await guestPage.getByRole('heading', { name: 'Write one private note' }).waitFor();
+  await page.getByRole('region', { name: 'Round prompt' }).getByText(firstRoundPrompt, { exact: true }).waitFor();
+  await guestPage.getByRole('region', { name: 'Round prompt' }).getByText(firstRoundPrompt, { exact: true }).waitFor();
+  const beginPromptCommand = await page.evaluate(() => window.sentCommands.find(command => command.type === 'begin'));
+  assert(beginPromptCommand?.prompt === firstRoundPrompt, 'Begin did not send the trimmed round prompt.');
   assert(await page.getByRole('heading', { name: 'Write one private note' }).evaluate((node) => node === document.activeElement), 'Phase heading did not receive focus after Begin.');
 
   const lateContext = await browser.newContext({ viewport: { width: 1024, height: 768 } });
@@ -226,6 +235,7 @@ async (page) => {
   await latePage.getByLabel('Your display name').last().fill('Late Guest');
   await latePage.getByRole('button', { name: 'Join room' }).click();
   await latePage.getByRole('heading', { name: "You're in the next round" }).waitFor();
+  await latePage.getByRole('region', { name: 'Round prompt' }).getByText(firstRoundPrompt, { exact: true }).waitFor();
   await capture(latePage, 'waiting-desktop');
   await latePage.setViewportSize({ width: 320, height: 800 });
   await noHorizontalOverflow(latePage, '320 waiting');
@@ -235,6 +245,7 @@ async (page) => {
   await page.getByLabel('Your note').fill('owner first draft');
   await page.getByRole('button', { name: "I'm ready" }).click();
   await page.getByRole('heading', { name: /You're ready/ }).waitFor();
+  await page.getByRole('region', { name: 'Round prompt' }).getByText(firstRoundPrompt, { exact: true }).waitFor();
   await capture(page, 'ready-desktop');
   await page.setViewportSize({ width: 320, height: 800 });
   await noHorizontalOverflow(page, '320 ready');
@@ -280,6 +291,11 @@ async (page) => {
   await latePage.getByRole('heading', { name: 'Notes up!' }).waitFor();
   await page.getByText('guest private browser phrase').waitFor();
   await guestPage.getByText('owner private browser phrase').waitFor();
+  await page.getByRole('region', { name: 'Round prompt' }).getByText(firstRoundPrompt, { exact: true }).waitFor();
+  await guestPage.getByRole('region', { name: 'Round prompt' }).getByText(firstRoundPrompt, { exact: true }).waitFor();
+  await latePage.getByRole('region', { name: 'Round prompt' }).getByText(firstRoundPrompt, { exact: true }).waitFor();
+  const nextPromptInput = page.getByLabel('Round prompt (optional)');
+  assert(await nextPromptInput.inputValue() === '', 'Next-round prompt input inherited the completed prompt.');
   assert(await page.getByRole('heading', { name: 'Notes up!' }).evaluate((node) => node === document.activeElement), 'Reveal heading did not receive focus.');
   await noHorizontalOverflow(guestPage, 'phone reveal');
   assert((await latePage.evaluate(() => window.noteFlights)).length === 0, 'Late join invented a personal reveal flight');
@@ -289,10 +305,17 @@ async (page) => {
   await revealMatrix(page, 'reveal-two');
   await page.setViewportSize({ width: 1440, height: 900 });
 
+  const secondRoundPrompt = 'Name one small win.';
+  await nextPromptInput.fill(`  ${secondRoundPrompt}  `);
   await page.getByRole('button', { name: 'Start a new round' }).click();
   await page.getByRole('heading', { name: 'Write one private note' }).waitFor();
   await guestPage.getByRole('heading', { name: 'Write one private note' }).waitFor();
   await latePage.getByRole('heading', { name: 'Write one private note' }).waitFor();
+  await page.getByRole('region', { name: 'Round prompt' }).getByText(secondRoundPrompt, { exact: true }).waitFor();
+  await guestPage.getByRole('region', { name: 'Round prompt' }).getByText(secondRoundPrompt, { exact: true }).waitFor();
+  await latePage.getByRole('region', { name: 'Round prompt' }).getByText(secondRoundPrompt, { exact: true }).waitFor();
+  const replayPromptCommand = await page.evaluate(() => window.sentCommands.find(command => command.type === 'replay'));
+  assert(replayPromptCommand?.prompt === secondRoundPrompt, 'Replay did not send the trimmed new prompt.');
   assert(!(await page.content()).includes('owner private browser phrase'), 'Replay retained a prior note in the active experience.');
 
   assert(await page.locator('.note-flight-out').count() === 0, 'Replay retained outgoing decoration');

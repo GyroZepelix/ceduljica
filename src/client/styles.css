@@ -161,6 +161,31 @@ textarea { resize: vertical; min-height: 210px; line-height: 1.55; font-size: 1.
 .inline-control { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
 .owner-controls { margin-top: 28px; padding-top: 22px; border-top: 3px dashed var(--ink); }
 .owner-controls .button { margin-right: 12px; margin-bottom: 12px; }
+.prompt-composer {
+  position: relative;
+  flex: 1 0 100%;
+  max-width: 680px;
+  margin: 0 0 18px;
+  padding: 14px 20px 8px 16px;
+  border: 3px solid var(--ink);
+  background: #fff1ca;
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+}
+.prompt-composer label { margin-top: 0; }
+.prompt-composer input { background: var(--surface); }
+.prompt-composer .supporting { margin: 8px 0 0; }
+.round-prompt {
+  position: relative;
+  margin: 20px 0 24px;
+  padding: 14px 48px 14px 18px;
+  border: 3px solid var(--ink);
+  background: #fff1ca;
+  box-shadow: 4px 4px 0 rgba(36,21,74,.14);
+  clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%);
+}
+.round-prompt-label { margin: 0 0 3px; color: var(--muted); font-family: ui-rounded, "Arial Rounded MT Bold", "Avenir Next Rounded", system-ui, sans-serif; font-size: .78rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
+.round-prompt-text { margin: 0; font-size: 1.05rem; font-weight: 750; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.room-reveal .round-prompt { width: min(760px, 100%); margin-inline: auto; text-align: left; }
 .owner-stamp { display: inline-block; flex: 0 0 auto; margin: 0; background: #fff1ca; color: var(--ink); border: 3px double var(--ink); border-radius: 4px; padding: 3px 7px; font-size: .78rem; font-weight: 900; letter-spacing: .04em; line-height: 1.5; }
 .waiting-copy { padding: 16px; background: var(--yellow); border: 3px solid var(--ink); border-radius: 16px; font-weight: 800; }
 .privacy-note { background: var(--sky-soft); }
@@ -188,7 +213,7 @@ textarea { resize: vertical; min-height: 210px; line-height: 1.55; font-size: 1.
 .sticky-note { min-height: 190px; padding: 30px 20px 14px; border: 3px solid var(--ink); border-radius: 0; clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 0 100%); display: flex; flex-direction: column; position: relative; animation: card-in 360ms ease-out both; }
 .sticky-note:nth-child(odd) { transform: rotate(-.7deg); }
 .sticky-note:nth-child(even) { transform: rotate(.7deg); }
-.sticky-note::after, .composer-note::after, .flight-paper::after { content: ""; position: absolute; top: -3px; right: -3px; width: 29px; height: 29px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath d='M1.5 1.5V27.5H27.5Z' fill='%23ffeb96' stroke='%2324154a' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat; pointer-events: none; }
+.sticky-note::after, .composer-note::after, .flight-paper::after, .round-prompt::after, .prompt-composer::after { content: ""; position: absolute; top: -3px; right: -3px; width: 29px; height: 29px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath d='M1.5 1.5V27.5H27.5Z' fill='%23ffeb96' stroke='%2324154a' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat; pointer-events: none; }
 .sticky-note p { flex: 1; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 1.08rem; line-height: 1.5; }
 .sticky-note footer { display: flex; align-items: center; gap: 8px; border-top: 2px solid rgba(36,21,74,.28); padding-top: 9px; font-weight: 900; }
 .sticky-note footer span { min-width: 0; }
@@ -264,6 +289,8 @@ textarea { resize: vertical; min-height: 210px; line-height: 1.55; font-size: 1.
   .phase-card { padding: 20px 16px; }
   .open-phase { padding: 0; }
   .composer-note { padding: 22px 16px 16px; }
+  .prompt-composer { padding-inline: 14px 18px; }
+  .round-prompt { padding: 12px 40px 12px 14px; }
   .card-number { font-size: 1.5rem; }
   .secondary-pal { display: none; }
 }

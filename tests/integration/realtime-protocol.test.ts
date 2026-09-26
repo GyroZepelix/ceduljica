@@ -177,6 +177,58 @@ describe('real-time participant-specific protocol', () => {
     expect(JSON.stringify(reveal)).toContain('transport-guest-secret');
   });
 
+  it('transports round prompts, rejects invalid values, and accepts omitted replay fields', async () => {
+    await setup();
+    const owner = await post('/api/rooms', { nickname: 'Owner' });
+    const guest = await post(`/api/rooms/${owner.credentials.roomCode}/join`, { nickname: 'Guest' });
+    const ownerClient = await connect(owner.credentials.sessionToken);
+    const guestClient = await connect(guest.credentials.sessionToken);
+
+    guestClient.send({ id: 'forbidden-prompt', type: 'begin', prompt: 'Not authorized' });
+    const forbidden = await guestClient.waitFor(
+      (message) => record(message)?.type === 'error' && record(message)?.id === 'forbidden-prompt',
+    );
+    expect(record(record(forbidden)?.error)?.code).toBe('forbidden');
+
+    ownerClient.send({ id: 'invalid-newline', type: 'begin', prompt: 'one\ntwo' });
+    const newline = await ownerClient.waitFor(
+      (message) => record(message)?.type === 'error' && record(message)?.id === 'invalid-newline',
+    );
+    expect(record(record(newline)?.error)).toEqual({
+      code: 'invalid_input',
+      message: 'Round prompt must be a single line of at most 200 characters.',
+    });
+    ownerClient.send({ id: 'invalid-long', type: 'begin', prompt: 'x'.repeat(201) });
+    const long = await ownerClient.waitFor(
+      (message) => record(message)?.type === 'error' && record(message)?.id === 'invalid-long',
+    );
+    expect(record(record(long)?.error)?.code).toBe('invalid_input');
+
+    ownerClient.send({ id: 'prompted-begin', type: 'begin', prompt: '  A shared question?  ' });
+    await ownerClient.waitFor(isAck('prompted-begin'));
+    const writing = await guestClient.waitFor(snapshotWithPhase('writing'));
+    expect(record(record(writing)?.room)?.roundPrompt).toBe('A shared question?');
+
+    ownerClient.send({ id: 'owner-prompt-draft', type: 'save_draft', body: 'Owner answer' });
+    guestClient.send({ id: 'guest-prompt-draft', type: 'save_draft', body: 'Guest answer' });
+    await ownerClient.waitFor(isAck('owner-prompt-draft'));
+    await guestClient.waitFor(isAck('guest-prompt-draft'));
+    ownerClient.send({ id: 'owner-prompt-ready', type: 'ready' });
+    guestClient.send({ id: 'guest-prompt-ready', type: 'ready' });
+    await ownerClient.waitFor(isAck('owner-prompt-ready'));
+    await guestClient.waitFor(isAck('guest-prompt-ready'));
+    const reveal = await guestClient.waitFor(snapshotWithPhase('reveal'));
+    expect(record(record(reveal)?.room)?.roundPrompt).toBe('A shared question?');
+    const revealVersion = roomVersion(reveal);
+
+    ownerClient.send({ id: 'omitted-replay', type: 'replay' });
+    await ownerClient.waitFor(isAck('omitted-replay'));
+    const replay = await guestClient.waitFor(
+      (message) => snapshotWithPhase('writing')(message) && roomVersion(message) > revealVersion,
+    );
+    expect(record(record(replay)?.room)?.roundPrompt).toBe('');
+  });
+
   it('drives the complete owner, waiting, replay, transfer, removal, and deletion flow', async () => {
     await setup();
     const owner = await post('/api/rooms', { nickname: 'Owner' });

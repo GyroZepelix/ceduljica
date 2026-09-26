@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SqliteRoomStore } from '../../src/db/sqlite-room-store.js';
 import { RoomService } from '../../src/domain/room-service.js';
+import type { Round } from '../../src/domain/types.js';
 import { DISCONNECT_GRACE_MS, ROOM_TTL_MS } from '../../src/shared/constants.js';
 import { DeterministicIdentities, FakeClock, temporaryDatabase } from '../helpers.js';
 
@@ -13,7 +14,7 @@ describe('SQLite persistence', () => {
     let service = new RoomService(store, clock, identities);
     const owner = service.create('Owner');
     const guest = service.join(owner.credentials.roomCode, 'Guest');
-    service.begin(owner.credentials.sessionToken);
+    service.begin(owner.credentials.sessionToken, '  Persist this question  ');
     service.saveDraft(owner.credentials.sessionToken, 'persisted private owner draft');
     service.saveDraft(guest.credentials.sessionToken, 'persisted private guest draft');
     service.ready(guest.credentials.sessionToken);
@@ -24,10 +25,36 @@ describe('SQLite persistence', () => {
     expect(service.recoverAfterRestart()).toHaveLength(1);
     const ownerView = service.reconnect(owner.credentials.sessionToken);
     const guestView = service.reconnect(guest.credentials.sessionToken);
+    expect(ownerView.roundPrompt).toBe('Persist this question');
+    expect(guestView.roundPrompt).toBe('Persist this question');
     expect(ownerView.ownNote?.body).toBe('persisted private owner draft');
     expect(JSON.stringify(ownerView)).not.toContain('persisted private guest draft');
     expect(guestView.ownNote).toEqual({ body: 'persisted private guest draft', ready: true });
     expect(JSON.stringify(guestView)).not.toContain('persisted private owner draft');
+
+    store.close();
+    database.cleanup();
+  });
+
+  it('projects an empty prompt from a stored legacy round without rewriting the schema', () => {
+    const database = temporaryDatabase();
+    const clock = new FakeClock();
+    const identities = new DeterministicIdentities();
+    let store = new SqliteRoomStore(database.path);
+    let service = new RoomService(store, clock, identities);
+    const owner = service.create('Owner');
+    service.join(owner.credentials.roomCode, 'Guest');
+    service.begin(owner.credentials.sessionToken, 'Temporary prompt');
+    const stored = store.findByCode(owner.credentials.roomCode);
+    expect(stored?.round).not.toBeNull();
+    if (!stored?.round) throw new Error('Expected a stored round.');
+    delete (stored.round as Partial<Round>).prompt;
+    store.save(stored);
+    store.close();
+
+    store = new SqliteRoomStore(database.path);
+    service = new RoomService(store, clock, identities);
+    expect(service.snapshot(owner.credentials.sessionToken).roundPrompt).toBe('');
 
     store.close();
     database.cleanup();

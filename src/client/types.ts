@@ -12,12 +12,12 @@ export interface StoredSession {
 }
 
 export type RoomCommand =
-  | { type: 'begin' }
+  | { type: 'begin'; prompt?: string }
   | { type: 'save_draft'; body: string }
   | { type: 'ready' }
   | { type: 'edit' }
   | { type: 'remove'; participantId: string }
-  | { type: 'replay' }
+  | { type: 'replay'; prompt?: string }
   | { type: 'delete_room' };
 
 export interface ServerProblem {

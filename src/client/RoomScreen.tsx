@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { ParticipantSummary, RoomProjection } from '../domain/types.js';
+import { MAX_ROUND_PROMPT_LENGTH } from '../shared/constants.js';
 import { NoteMark, PlazaBackdrop } from './Artwork.js';
 import { Avatar } from './Avatar.js';
 import { NoteFlight } from './NoteFlight.js';
@@ -170,6 +171,7 @@ function Lobby({ room, busy, headingRef, onAct }: Omit<PhaseContentProps, 'onDel
   const connected = room.participants.filter((person) => person.connected).length;
   const invite = `${window.location.origin}/room/${room.roomCode}`;
   const [copyMessage, setCopyMessage] = useState('');
+  const [prompt, setPrompt] = useState('');
   async function copyInvite(): Promise<void> {
     try {
       await navigator.clipboard.writeText(invite);
@@ -194,13 +196,43 @@ function Lobby({ room, busy, headingRef, onAct }: Omit<PhaseContentProps, 'onDel
       {room.self.isOwner ? (
         <div aria-label="Owner controls" className="owner-controls">
           <h2>Owner controls</h2>
-          <button className="button primary" disabled={!room.canBegin || busy} onClick={() => { void onAct({ type: 'begin' }); }} type="button">
+          <PromptComposer disabled={busy} onChange={setPrompt} value={prompt} />
+          <button className="button primary" disabled={!room.canBegin || busy} onClick={() => { void onAct({ type: 'begin', prompt: prompt.trim() }); }} type="button">
             Begin writing
           </button>
           {!room.canBegin ? <p className="supporting">Begin unlocks when 2 connected people are here.</p> : null}
         </div>
       ) : <p className="waiting-copy">Waiting for the owner to begin.</p>}
     </>
+  );
+}
+
+function PromptComposer({ value, disabled, onChange }: { value: string; disabled: boolean; onChange: (value: string) => void }): ReactNode {
+  return (
+    <div className="prompt-composer">
+      <label htmlFor="round-prompt-input">Round prompt (optional)</label>
+      <input
+        aria-describedby="round-prompt-help"
+        disabled={disabled}
+        id="round-prompt-input"
+        maxLength={MAX_ROUND_PROMPT_LENGTH}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder="What should everyone answer?"
+        type="text"
+        value={value}
+      />
+      <p className="supporting" id="round-prompt-help">One line · {value.length} / {MAX_ROUND_PROMPT_LENGTH}</p>
+    </div>
+  );
+}
+
+function RoundPrompt({ prompt }: { prompt: string }): ReactNode {
+  if (!prompt) return null;
+  return (
+    <section aria-label="Round prompt" className="round-prompt">
+      <p className="round-prompt-label">Round prompt</p>
+      <p className="round-prompt-text">{prompt}</p>
+    </section>
   );
 }
 
@@ -253,6 +285,7 @@ function Writing({ room, busy, headingRef, onAct }: Omit<PhaseContentProps, 'onD
       <>
         <p className="eyebrow">Writing · you joined mid-round</p>
         <h1 ref={headingRef} tabIndex={-1}>You're in the next round</h1>
+        <RoundPrompt prompt={room.roundPrompt} />
         <div className="info-panel"><span aria-hidden="true">⌛</span><p>Watch this round finish. No note is needed from you yet.</p></div>
         <p>{readyCount} of {active.length} active people are ready.</p>
       </>
@@ -265,6 +298,7 @@ function Writing({ room, busy, headingRef, onAct }: Omit<PhaseContentProps, 'onD
       <>
         <p className="eyebrow">Writing · {readyCount} of {active.length} ready</p>
         <h1 className="ready-heading" ref={headingRef} tabIndex={-1}><span aria-hidden="true">✓</span> You're ready</h1>
+        <RoundPrompt prompt={room.roundPrompt} />
         <p>{remaining === 0 ? 'Reveal is starting.' : `Waiting for ${remaining} more. You can edit until reveal starts.`}</p>
         <div className="composer-note">
           <p className="note-label">Your note · ready</p>
@@ -280,6 +314,7 @@ function Writing({ room, busy, headingRef, onAct }: Omit<PhaseContentProps, 'onD
     <>
       <p className="eyebrow">Writing · {readyCount} of {active.length} ready</p>
       <h1 ref={headingRef} tabIndex={-1}>Write one private note</h1>
+      <RoundPrompt prompt={room.roundPrompt} />
       <p className="privacy-note"><span aria-hidden="true">◉</span> Only your note is sent back to you before reveal.</p>
       <div className="composer-note">
         <label htmlFor="note">Your note</label>
@@ -320,12 +355,14 @@ function Writing({ room, busy, headingRef, onAct }: Omit<PhaseContentProps, 'onD
 
 function Reveal({ room, busy, headingRef, onAct, onDelete }: PhaseContentProps): ReactNode {
   const notes = room.revealedNotes ?? [];
+  const [prompt, setPrompt] = useState('');
   return (
     <>
       <div aria-hidden="true" className="reveal-burst" />
       <p className="eyebrow">Reveal</p>
       <h1 ref={headingRef} tabIndex={-1}>Notes up!</h1>
       <p className="lede">{notes.length} {notes.length === 1 ? 'note' : 'notes'} · everyone sees the same board</p>
+      <RoundPrompt prompt={room.roundPrompt} />
       {notes.length >= 9 ? <p className="mobile-note-progress">{notes.length} notes · note 1 of {notes.length} · scroll ↓</p> : null}
       <ol className={`note-board notes-${density(notes.length)}`}>
         {notes.map((note, index) => (
@@ -338,7 +375,8 @@ function Reveal({ room, busy, headingRef, onAct, onDelete }: PhaseContentProps):
       {room.self.isOwner ? (
         <div aria-label="Owner controls" className="owner-controls reveal-controls">
           <p className="owner-stamp">Owner</p>
-          <button className="button primary" disabled={!room.canReplay || busy} onClick={() => { void onAct({ type: 'replay' }); }} type="button">Start a new round</button>
+          <PromptComposer disabled={busy} onChange={setPrompt} value={prompt} />
+          <button className="button primary" disabled={!room.canReplay || busy} onClick={() => { void onAct({ type: 'replay', prompt: prompt.trim() }); }} type="button">Start a new round</button>
           {!room.canReplay ? <p className="supporting">A new round needs 2 connected people.</p> : null}
           <button className="button danger" disabled={busy} onClick={onDelete} type="button">⌫ Delete room</button>
         </div>

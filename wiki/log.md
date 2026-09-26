@@ -50,3 +50,11 @@ Use this shape for new entries:
 - Wiki pages changed: `wiki/architecture/room-core.md`, this log, `wiki/dreams/2026-09-25-1554-gamemaster-checkpoint-260925-1219-ceduljica-annotation-driven-visual-fixes-02-01.md`, `wiki/dreams/episodes.jsonl`, and `wiki/dreams/by-spec/260925-1219-ceduljica-annotation-driven-visual-fixes.md`.
 - Verification: source-supported guidance and its exact ledger review blocks checked; memory safety, catalog/frontmatter identity, relative links, append-only history and non-wiki/index preservation checks performed.
 - Notes: final visual/Compose acceptance, native 200% zoom and scheduled reviews remain pending in 02.02. Runtime-port observations and harness failures stay episodic. No observations, new dynamic pages, pointer/index routes, or ingest/checkpoint state were added.
+
+## [2026-09-26] implement | round prompt authority and compatibility
+
+- Trigger: verified implementation added optional round prompts across the authoritative service, real-time transport, persistence compatibility, and responsive room UI.
+- Inputs: `src/domain/validation.ts`, `src/domain/room-service.ts`, `src/domain/types.ts`, `src/server/`, `src/client/RoomScreen.tsx`, focused and full test evidence, and work item `260926-1439-add-round-prompts`.
+- Wiki pages changed: `wiki/architecture/room-core.md` and this maintenance log.
+- Verification: focused domain/protocol/persistence and client suites passed; lint, typecheck, all 54 Vitest tests, production build, two-participant browser E2E, 320 px visual inspection, 200% zoom inspection, diff check, and item validation passed.
+- Notes: prompts remain optional single-line plain text, are round-owned, and preserve schema-v1 and omitted-command compatibility; no SQL migration or dependency was added.

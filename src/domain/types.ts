@@ -19,6 +19,7 @@ export interface Note {
 export interface Round {
   id: string;
   number: number;
+  prompt: string;
   activeParticipantIds: string[];
   notes: Record<string, Note>;
   revealedAt: number | null;
@@ -68,6 +69,7 @@ export interface RevealedNoteProjection {
 export interface RoomProjection {
   roomId: string;
   roundId: string | null;
+  roundPrompt: string;
   roomCode: string;
   phase: RoomPhase;
   version: number;

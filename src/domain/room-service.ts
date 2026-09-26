@@ -9,7 +9,7 @@ import {
 } from '../shared/constants.js';
 import { RoomError } from './errors.js';
 import { availableAvatarSlot, normalizeAvatarSlots } from './avatar-slots.js';
-import { parseDraft, parseNickname, parseParticipantId } from './validation.js';
+import { parseDraft, parseNickname, parseParticipantId, parseRoundPrompt } from './validation.js';
 import type {
   Credentials,
   Participant,
@@ -131,14 +131,15 @@ export class RoomService {
     return projectRoom(room, participant.id);
   }
 
-  begin(sessionToken: string): RoomProjection {
+  begin(sessionToken: string, promptInput?: unknown): RoomProjection {
     return this.mutate(sessionToken, true, (room, actor) => {
       requireOwner(room, actor.id);
       if (room.phase === 'writing') return;
       if (room.phase !== 'lobby') {
         throw new RoomError('invalid_phase', 'A round can only begin from the lobby.');
       }
-      room.round = createRound(room, 1, this.identities.id());
+      const prompt = parseRoundPrompt(promptInput);
+      room.round = createRound(room, 1, this.identities.id(), prompt);
       room.phase = 'writing';
     });
   }
@@ -198,14 +199,15 @@ export class RoomService {
     });
   }
 
-  replay(sessionToken: string): RoomProjection {
+  replay(sessionToken: string, promptInput?: unknown): RoomProjection {
     return this.mutate(sessionToken, true, (room, actor) => {
       requireOwner(room, actor.id);
       if (room.phase === 'writing') return;
       if (room.phase !== 'reveal' || !room.round) {
         throw new RoomError('invalid_phase', 'Replay is available only after reveal.');
       }
-      room.round = createRound(room, room.round.number + 1, this.identities.id());
+      const prompt = parseRoundPrompt(promptInput);
+      room.round = createRound(room, room.round.number + 1, this.identities.id(), prompt);
       room.phase = 'writing';
     });
   }
@@ -384,7 +386,7 @@ export class RoomService {
   }
 }
 
-function createRound(room: Room, number: number, id: string): Round {
+function createRound(room: Room, number: number, id: string, prompt: string): Round {
   const active = room.participants.filter((participant) => participant.connected);
   if (active.length < MIN_ROUND_PARTICIPANTS) {
     throw new RoomError(
@@ -395,6 +397,7 @@ function createRound(room: Room, number: number, id: string): Round {
   return {
     id,
     number,
+    prompt,
     activeParticipantIds: active.map((participant) => participant.id),
     notes: Object.fromEntries(
       active.map((participant) => [participant.id, { body: '', ready: false }]),
@@ -438,6 +441,7 @@ function projectRoom(room: Room, participantId: string): RoomProjection {
   const projection: RoomProjection = {
     roomId: room.id,
     roundId: room.round?.id ?? null,
+    roundPrompt: room.round?.prompt ?? '',
     roomCode: room.code,
     phase: room.phase,
     version: room.version,

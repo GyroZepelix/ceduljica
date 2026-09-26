@@ -33,6 +33,7 @@ function projection(overrides: Partial<RoomProjection> = {}): RoomProjection {
   return {
     roomId: 'room-id',
     roundId: null,
+    roundPrompt: '',
     roomCode: 'abcdefghijklmnopqrstuvwx',
     phase: 'lobby',
     version: 1,
@@ -108,6 +109,77 @@ describe('entry and modal accessibility', () => {
 });
 
 describe('authoritative room rendering', () => {
+  it('sends trimmed optional prompts from blank owner controls for begin and replay', async () => {
+    const user = userEvent.setup();
+    const beginCommand = vi.fn(() => Promise.resolve());
+    renderRoom(projection(), beginCommand);
+    const beginPrompt = screen.getByRole('textbox', { name: 'Round prompt (optional)' });
+    expect((beginPrompt as HTMLInputElement).value).toBe('');
+    expect(beginPrompt.getAttribute('maxlength')).toBe('200');
+    await user.type(beginPrompt, '  What made you smile?  ');
+    await user.click(screen.getByRole('button', { name: 'Begin writing' }));
+    expect(beginCommand).toHaveBeenCalledWith({ type: 'begin', prompt: 'What made you smile?' });
+    cleanup();
+
+    const replayCommand = vi.fn(() => Promise.resolve());
+    renderRoom(projection({
+      phase: 'reveal',
+      roundId: 'round-one',
+      roundPrompt: 'Previous question',
+      revealedNotes: [],
+      canBegin: false,
+      canReplay: true,
+    }), replayCommand);
+    const replayPrompt = screen.getByRole('textbox', { name: 'Round prompt (optional)' });
+    expect((replayPrompt as HTMLInputElement).value).toBe('');
+    await user.type(replayPrompt, '  A new question  ');
+    await user.click(screen.getByRole('button', { name: 'Start a new round' }));
+    expect(replayCommand).toHaveBeenCalledWith({ type: 'replay', prompt: 'A new question' });
+  });
+
+  it('shows plain-text prompts in active, ready, waiting, and reveal views but suppresses blanks', () => {
+    const prompt = 'Answer <strong>as plain text</strong>';
+    const activeRoom = projection({
+      phase: 'writing',
+      roundId: 'round-one',
+      roundPrompt: prompt,
+      self: { participantId: owner.id, nickname: owner.nickname, isOwner: true, roundRole: 'active' },
+      participants: [{ ...owner, roundRole: 'active' }, { ...guest, roundRole: 'active' }],
+      ownNote: { body: '', ready: false },
+      canBegin: false,
+    });
+    renderRoom(activeRoom);
+    let promptRegion = screen.getByRole('region', { name: 'Round prompt' });
+    expect(within(promptRegion).getByText(prompt)).toBeTruthy();
+    expect(promptRegion.querySelector('strong')).toBeNull();
+    cleanup();
+
+    renderRoom({ ...activeRoom, ownNote: { body: 'Ready answer', ready: true } });
+    expect(screen.getByRole('region', { name: 'Round prompt' })).toBeTruthy();
+    cleanup();
+
+    const waitingRoom = { ...activeRoom, self: { ...activeRoom.self, roundRole: 'waiting' as const } };
+    delete waitingRoom.ownNote;
+    renderRoom(waitingRoom);
+    expect(screen.getByRole('region', { name: 'Round prompt' })).toBeTruthy();
+    cleanup();
+
+    const revealRoom: RoomProjection = {
+      ...activeRoom,
+      phase: 'reveal',
+      revealedNotes: [],
+      canReplay: true,
+    };
+    delete revealRoom.ownNote;
+    renderRoom(revealRoom);
+    promptRegion = screen.getByRole('region', { name: 'Round prompt' });
+    expect(within(promptRegion).getByText(prompt)).toBeTruthy();
+    cleanup();
+
+    renderRoom({ ...activeRoom, roundPrompt: '' });
+    expect(screen.queryByRole('region', { name: 'Round prompt' })).toBeNull();
+  });
+
   it('renders only the participant own draft before reveal and keeps Enter in the editor', () => {
     const room = projection({
       phase: 'writing',

@@ -225,7 +225,7 @@ export class CeduljicaServer {
 
     switch (command.type) {
       case 'begin':
-        this.rooms.begin(connection.token);
+        this.rooms.begin(connection.token, command.prompt);
         break;
       case 'save_draft':
         this.rooms.saveDraft(connection.token, command.body);
@@ -240,7 +240,7 @@ export class CeduljicaServer {
         this.rooms.remove(connection.token, command.participantId);
         break;
       case 'replay':
-        this.rooms.replay(connection.token);
+        this.rooms.replay(connection.token, command.prompt);
         break;
     }
     sendSocket(connection.socket, { type: 'ack', id: command.id });

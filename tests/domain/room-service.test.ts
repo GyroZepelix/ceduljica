@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { RoomError } from '../../src/domain/errors.js';
-import { DISCONNECT_GRACE_MS, ROOM_TTL_MS } from '../../src/shared/constants.js';
+import {
+  DISCONNECT_GRACE_MS,
+  MAX_ROUND_PROMPT_LENGTH,
+  ROOM_TTL_MS,
+} from '../../src/shared/constants.js';
 import { serviceFixture, type ServiceFixture } from '../helpers.js';
 
 let fixture: ServiceFixture | undefined;
@@ -64,6 +68,52 @@ describe('RoomService lifecycle and authority', () => {
       expect.objectContaining({ code: 'session_not_found' }),
     );
     expect(service.begin(owner.credentials.sessionToken).phase).toBe('writing');
+  });
+
+  it('normalizes, validates, authorizes, projects, and replaces round prompts', () => {
+    const { service } = setup();
+    const owner = service.create('Owner');
+    const guest = service.join(owner.credentials.roomCode, 'Guest');
+
+    expect(() => service.begin(guest.credentials.sessionToken, 'Not mine')).toThrowError(
+      expect.objectContaining({ code: 'forbidden' }),
+    );
+    expect(() => service.begin(owner.credentials.sessionToken, 'line one\nline two')).toThrowError(
+      expect.objectContaining({ code: 'invalid_input' }),
+    );
+    expect(() => service.begin(owner.credentials.sessionToken, 'x'.repeat(MAX_ROUND_PROMPT_LENGTH + 1))).toThrowError(
+      expect.objectContaining({ code: 'invalid_input' }),
+    );
+
+    const writing = service.begin(owner.credentials.sessionToken, '  What made you smile?  ');
+    expect(writing.roundPrompt).toBe('What made you smile?');
+    expect(service.snapshot(guest.credentials.sessionToken).roundPrompt).toBe('What made you smile?');
+    const late = service.join(owner.credentials.roomCode, 'Late');
+    expect(late.projection.roundPrompt).toBe('What made you smile?');
+    expect(service.reconnect(guest.credentials.sessionToken).roundPrompt).toBe('What made you smile?');
+
+    service.saveDraft(owner.credentials.sessionToken, 'Owner answer');
+    service.saveDraft(guest.credentials.sessionToken, 'Guest answer');
+    service.ready(owner.credentials.sessionToken);
+    const reveal = service.ready(guest.credentials.sessionToken);
+    expect(reveal.roundPrompt).toBe('What made you smile?');
+    expect(service.snapshot(late.credentials.sessionToken).roundPrompt).toBe('What made you smile?');
+
+    const replay = service.replay(owner.credentials.sessionToken, '  Next question  ');
+    expect(replay.roundPrompt).toBe('Next question');
+    expect(service.snapshot(guest.credentials.sessionToken).roundPrompt).toBe('Next question');
+  });
+
+  it('defaults omitted and whitespace-only round prompts to empty strings', () => {
+    const { service } = setup();
+    const owner = service.create('Owner');
+    const guest = service.join(owner.credentials.roomCode, 'Guest');
+    expect(service.begin(owner.credentials.sessionToken).roundPrompt).toBe('');
+    service.saveDraft(owner.credentials.sessionToken, 'Owner answer');
+    service.saveDraft(guest.credentials.sessionToken, 'Guest answer');
+    service.ready(owner.credentials.sessionToken);
+    service.ready(guest.credentials.sessionToken);
+    expect(service.replay(owner.credentials.sessionToken, '   ').roundPrompt).toBe('');
   });
 
   it('keeps each draft private until the final Ready atomically reveals all notes', () => {

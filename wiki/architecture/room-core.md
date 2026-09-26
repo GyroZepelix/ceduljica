@@ -15,6 +15,14 @@ Read this page when changing Ceduljica room lifecycle behavior, real-time client
 - Time-dependent behavior uses an injected clock. A 60-second disconnect deadline controls active-round removal and owner transfer, while 24-hour expiry advances only on accepted meaningful actions; passive WebSocket ping and disconnect handling do not extend room lifetime.
 - Startup recovery treats formerly connected participants as disconnected with a fresh grace deadline, preserving unexpired room and round state for authoritative reconnect and resynchronization.
 
+## Round prompt boundary and legacy compatibility
+
+- Each `Round` owns one normalized prompt string. Owners submit the optional prompt only with the authoritative `begin` or `replay` command; `RoomService` trims it, rejects carriage returns/newlines and values over 200 characters, and stores it atomically with the new round. Client drafts remain local until that transition, and replay never copies the completed round's prompt into the next input.
+- `RoomProjection.roundPrompt` is participant-independent shared context, unlike private note bodies. It is available to every authenticated participant during writing and reveal, including ready writers and late-join waiters, while participant-specific note privacy remains unchanged.
+- The prompt is additive data inside the existing schema-v1 serialized room aggregate. Older command shapes may omit `prompt`, and older stored rounds may lack the property; both project an empty string without a SQL migration or eager room rewrite.
+
+Sources: `src/domain/validation.ts`, `src/domain/room-service.ts`, `src/domain/types.ts`, `src/server/protocol.ts`, `src/db/sqlite-room-store.ts`, `tests/domain/room-service.test.ts`, `tests/integration/realtime-protocol.test.ts`, and `tests/integration/sqlite-persistence.test.ts`.
+
 ## Stable avatar identity and legacy compatibility
 
 - `RoomService` allocates one room-local `avatarSlot` from 0-11 for each retained participant and projects it in participant summaries and revealed author records. Disconnected participants still reserve their slots, including eligible ready authors; only actual membership removal frees a slot. Never derive identity from client list order or participant-ID hashing.

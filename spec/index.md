@@ -20,6 +20,7 @@ Repository-local planning and execution artifacts.
 | --- | --- | --- | --- |
 | [Fun Sticky Note Rooms](./archive/260924-1909-fun-sticky-note-rooms/plan.md) | work-item | completed | 2026-09-25 |
 | [Ceduljica annotation-driven visual fixes](./archive/260925-1219-ceduljica-annotation-driven-visual-fixes/plan.md) | work-item | completed | 2026-09-25 |
+| [Add round prompts](./archive/260926-1439-add-round-prompts/plan.md) | work-item | completed | 2026-09-26 |
 <!-- spec-items:archive:end -->
 
 ## Templates
