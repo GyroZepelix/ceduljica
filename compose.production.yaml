@@ -1,0 +1,11 @@
+services:
+  app:
+    ports: !reset []
+    networks:
+      reverse-proxy:
+        aliases:
+          - ceduljica
+
+networks:
+  reverse-proxy:
+    external: true
